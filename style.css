@@ -229,8 +229,8 @@ dialog::backdrop{background:rgba(20,20,30,.4);backdrop-filter:blur(4px)}
 .dlg-who{display:flex;align-items:center;gap:10px}.dlg-who b{font-weight:500}
 .av{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:600;background-repeat:no-repeat;background-color:#d9dbe6;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .av-nar{background:var(--g)}.av-you{background:var(--dark);color:var(--dark-ink)}
-.av-aktan{background-image:url(assets/bg-bishkek.png);background-size:620px auto;background-position:-122px -125px}
-.av-akylai{background-image:url(assets/bg-bishkek.png);background-size:620px auto;background-position:-186px -127px}
+.av-aktan{background-image:url(assets/t-bishkek.jpg);background-size:620px auto;background-position:-122px -125px}
+.av-akylai{background-image:url(assets/t-bishkek.jpg);background-size:620px auto;background-position:-186px -127px}
 .av-bai{background-image:url(assets/baibolot.jpg);background-size:150px auto;background-position:-48px 2px}
 .av-aru{background-image:url(assets/aruuzat.jpg);background-size:150px auto;background-position:-50px 2px}
 .g-task{font-size:14px;padding:0 4px;color:var(--mute)}.g-task b{color:var(--ink);font-weight:500}

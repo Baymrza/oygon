@@ -22,7 +22,7 @@
   /* Во фразах [[приём|текст]] — красные флаги (целое предложение). Остальные предложения безопасны. */
   const ord = (a, idx) => idx.map(i => a[i]);
   const CH = [
-    { city: 'Бишкек', theme: 'Сообщение от «организатора»', bg: 'assets/bg-bishkek.png', actors: [],
+    { city: 'Бишкек', theme: 'Сообщение от «организатора»', bg: 'assets/t-bishkek.jpg', actors: [],
       dialog: [
         { who: 'Рассказчик', text: 'Бишкек, утро. Школьная поездка «Пять городов» стартует через час. Ты идёшь на сбор вместе с друзьями — Актаном и Акылай.' },
         { who: 'Актан', text: 'Нас всех добавили в общий чат поездки. Там уже больше двухсот человек!' },
@@ -42,7 +42,7 @@
       helper: { who: 'Актан', text: 'Настоящий организатор не просит коды из СМС и не запрещает говорить с учителем.' },
       safe: 'Никогда не отправляй коды из СМС и документы по первому запросу. Проверяй через учителя или официальный номер.' },
 
-    { city: 'Ош', theme: 'Закрытый круг «для избранных»', bg: 'assets/bg-osh.png', actors: [{ src: 'assets/baibolot.jpg', name: 'Байболот', side: 'right', flip: true }],
+    { city: 'Ош', theme: 'Закрытый круг «для избранных»', bg: 'assets/t-osh.jpg', actors: [{ src: 'assets/baibolot.jpg', name: 'Байболот', side: 'right', flip: true }],
       dialog: [
         { who: 'Рассказчик', text: 'Автобус привёз вас в Ош. У подножия горы вас встречает местный школьник Байболот.' },
         { who: 'Байболот', text: 'Добро пожаловать! Покажу вам город. Только не удивляйтесь: в нашем классе одного парня недавно втянули в «закрытый круг».' },
@@ -62,7 +62,7 @@
       helper: { who: 'Байболот', text: 'Если сначала хвалят, а потом просят молчать — это стоп-сигнал.' },
       safe: 'Не заходи в закрытые чаты к малознакомым людям. Если просят молчать — расскажи близкому человеку.' },
 
-    { city: 'Каракол', theme: 'Лёгкая подработка', bg: 'assets/bg-karakol.png', actors: [{ src: 'assets/aruuzat.jpg', name: 'Аруузат', side: 'left' }],
+    { city: 'Каракол', theme: 'Лёгкая подработка', bg: 'assets/t-karakol.jpg', actors: [{ src: 'assets/aruuzat.jpg', name: 'Аруузат', side: 'left' }],
       dialog: [
         { who: 'Рассказчик', text: 'Каракол: деревянные дома, старый собор и снежные вершины на горизонте. Здесь вас ждёт Аруузат, волонтёр кружка медиаграмотности.' },
         { who: 'Аруузат', text: 'Привет! Я каждую неделю вижу объявления про «лёгкую подработку». Сегодня такое прислали мне.' },
@@ -82,7 +82,7 @@
       helper: { who: 'Аруузат', text: 'Большие деньги за простое задание и паспорт заранее — классика обмана.' },
       safe: 'Проверь компанию, попроси договор, обсуди с близкими. Никаких документов до договора.' },
 
-    { city: 'Талас', theme: 'Слух и «срочная новость»', bg: 'assets/bg-talas.jpg', actors: [{ src: 'assets/talgat.jpg', name: 'Талгат', side: 'right' }],
+    { city: 'Талас', theme: 'Слух и «срочная новость»', bg: 'assets/t-talas.jpg', actors: [{ src: 'assets/talgat.jpg', name: 'Талгат', side: 'right' }],
       dialog: [
         { who: 'Рассказчик', text: 'Талас: тихая зелёная улица и горы вдалеке. Здесь вас встречает Талгат, школьный репортёр.' },
         { who: 'Талгат', text: 'Привет! Вчера в городе пошёл слух, который чуть не вызвал панику. Я поймал его в чате.' },
@@ -102,7 +102,7 @@
       helper: { who: 'Талгат', text: 'Нет автора, нет подтверждения, а просят сразу переслать? Остановись и проверь.' },
       safe: 'Перед репостом проверь автора, дату и второй независимый источник. Не пересылай то, что давит на эмоции.' },
 
-    { city: 'Ак-Буура', theme: 'Давление и угрозы', bg: 'assets/bg-akbuura.png',
+    { city: 'Ак-Буура', theme: 'Давление и угрозы', bg: 'assets/t-akbuura.jpg',
       actors: [{ src: 'assets/aruuzat.jpg', name: 'Аруузат', side: 'left' }, { src: 'assets/talgat.jpg', name: 'Талгат', side: 'center' }, { src: 'assets/baibolot.jpg', name: 'Байболот', side: 'right', flip: true }],
       dialog: [
         { who: 'Рассказчик', text: 'Последняя остановка: берег горной реки, мост и тёплый вечер. Байболот и Аруузат пришли проводить вас.' },
@@ -317,6 +317,7 @@
   }
   function typeText(el, text) {
     if (!el) return;
+    if (window.I18N) text = I18N.tr(text);
     clearInterval(G.tt); G.full = text; G.tel = el; el.setAttribute('aria-label', text);
     if (calm()) { el.textContent = text; G.typing = false; return; }
     let i = 0; G.typing = true; el.textContent = '';
@@ -411,11 +412,11 @@
         else travel(CH[G.ch + 1], G.ch + 1, () => { G.ch++; G.step = 'dialog'; G.line = 0; G.found = new Set(); G.neutral = new Set(); G.picked = null; G.hintOpen = false; render(); });
         break;
       case 'g-share': {
-        const txt = `Я прошёл игру «Путь пяти городов» в «Ойгон». Мой иммунитет: ${G.immun}%. А твой?`;
+        const txt = (window.I18N ? I18N.tr : String)(`Я прошёл игру «Путь пяти городов» в «Ойгон». Мой иммунитет: ${G.immun}%. А твой?`);
         if (navigator.share) navigator.share({ text: txt }).catch(() => { }); else navigator.clipboard && navigator.clipboard.writeText(txt).then(() => { el.textContent = 'Скопировано'; });
         break; }
     }
   }
 
-  window.GAME = { active, view, mount, handle, start, cities: CH.map(c => c.city) };
+  window.GAME = { active, view, mount, handle, start, chapters: CH, cities: CH.map(c => c.city) };
 })();

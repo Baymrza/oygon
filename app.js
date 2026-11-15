@@ -12,8 +12,8 @@
 
   /* ---------- i18n (интерфейс; контент пока на русском) ---------- */
   const T = {
-    ru: { about: 'О проекте', rules: 'Правила', partners: 'Партнёры', help: 'Помощь', home: 'Главная', events: 'Афиша', quest: 'Квест', trainer: 'Тренажёр', check: 'Проверка', support: 'Поддержка', report: 'Сообщить' },
-    ky: { about: 'Долбоор жөнүндө', rules: 'Эрежелер', partners: 'Өнөктөштөр', help: 'Жардам', home: 'Башкы', events: 'Афиша', quest: 'Квест', trainer: 'Машыгуу', check: 'Текшерүү', support: 'Колдоо', report: 'Кабарлоо' }
+    ru: { about: 'О проекте', rules: 'Правила', partners: 'Партнёры', help: 'Помощь', home: 'Главная', events: 'Афиша', quest: 'Квест', trainer: 'Тренажёр', check: 'Проверка', support: 'Поддержка', report: 'Сообщить', tagline: 'Цифровой иммунитет молодёжи' },
+    ky: { about: 'Долбоор жөнүндө', rules: 'Эрежелер', partners: 'Өнөктөштөр', help: 'Жардам', home: 'Башкы', events: 'Афиша', quest: 'Квест', trainer: 'Машыгуу', check: 'Текшерүү', support: 'Колдоо', report: 'Кабарлоо', tagline: 'Жаштардын санариптик иммунитети' }
   };
   let lang = LS.get('ob_lang', 'ru');
   const t = k => (T[lang] && T[lang][k]) || T.ru[k] || k;
@@ -59,48 +59,102 @@
   const reacted = () => LS.get('ob_react', {});
 
   /* ---------- состояние ---------- */
-  let Q = null, TR = null, timerId = null, checkTab = 'stories', evCat = 'Все', adminOK = false, adminTab = 'reports', supportSent = false, reportSent = null;
+  let Q = null, TR = null, timerId = null, checkTab = 'real', evCat = 'Все', adminOK = false, adminTab = 'reports', supportSent = false, reportSent = null;
   const QUEST_MAX = D.quest.scenes.length;
 
   /* ---------- вьюхи ---------- */
   const V = {};
 
-  // Главная: лента + афиша
+  /* изображения для карточек (по id демо-публикаций) */
+  const NIMG = { n1: 'assets/t-karakol.jpg', n2: 'assets/t-osh.jpg', n3: 'assets/t-talas.jpg', n4: 'assets/t-akbuura.jpg', n5: 'assets/t-bishkek.jpg' };
+  const EIMG = ['assets/t-bishkek.jpg', 'assets/t-osh.jpg', 'assets/t-karakol.jpg', 'assets/t-talas.jpg', 'assets/t-akbuura.jpg', 'assets/t-osh.jpg'];
+  const ARROW = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const allPosts = () => [...userNews(), ...D.news];
+  const allEvents = () => [...userEvents(), ...D.events];
+  const ncard = (p, i) => `<article class="ncard" data-act="post" data-id="${esc(p.id)}" role="button" tabindex="0"><div class="n-img ${NIMG[p.id] ? '' : 'ph'}" ${NIMG[p.id] ? `style="background-image:url(${NIMG[p.id]})"` : ''}></div><span class="n-tag t${i % 4}">${esc(p.tag)}</span><h3>${esc(p.title)}</h3><span class="n-meta">${esc(p.date)}</span></article>`;
+
+  // Главная: герой, плитки, «Главное», лента новостей, афиша
   V.home = () => {
     const best = LS.get('ob_best', null), quest = LS.get('ob_quest', null), game = LS.get('ob_game', null);
-    const posts = [...userNews(), ...D.news];
-    const evs = [...userEvents(), ...D.events];
-    const react = reacted();
-    const postHtml = p => {
-      const on = react[p.id], n = p.likes + (on ? 1 : 0);
-      return `<article class="card post">
-        <div class="post-meta"><span class="avatar">${esc(p.author[0])}</span><span>${esc(p.author)} · ${esc(p.date)}</span><span class="sp"></span><span class="badge">${esc(p.tag)}</span></div>
-        <h3>${esc(p.title)}</h3><p>${esc(p.text)}</p>
-        <div class="react"><button data-act="react" data-id="${p.id}" aria-pressed="${!!on}">Полезно · ${n}</button><button data-act="share" data-id="${p.id}">Поделиться</button></div>
-      </article>`;
-    };
-    const afisha = `<section aria-label="Афиша">
-      <div class="afisha-head"><h2>Призываем к хорошему</h2><span class="sp"></span><a class="btn ghost sm" href="#/events">Вся афиша</a></div>
-      <div class="hscroll">${evs.slice(0, 6).map(e => `<article class="card ev rim"><span class="badge">${esc(e.cat)}</span><h3>${esc(e.title)}</h3><span class="date">${esc(e.date)} · ${esc(e.place)}</span><p>${esc(e.desc)}</p></article>`).join('')}</div>
-    </section>`;
+    const posts = allPosts(), evs = allEvents();
     const imm = best ? best.pct : 0;
-    return `<div class="page">
-      <section class="card rim hero">
-        <span class="eyebrow">Цифровой иммунитет молодёжи</span>
-        <h1>Знающий человек <em>сам останавливает</em> манипулятора</h1>
-        <p>Квест, тренажёр и разборы реальных историй. Без регистрации, без сбора данных.</p>
-        <div class="row"><a class="btn" href="#/quest">Пройти квест</a><a class="btn ghost" href="#/trainer">Тренажёр</a></div>
-        <div class="stats">
-          <div class="stat"><b>${best ? imm + '%' : '—'}</b><span>твой иммунитет (лучший раунд)</span><div class="meter" style="margin-top:8px"><i style="width:${imm}%"></i></div></div>
-          <div class="stat"><b>${game ? game.immun + '%' : quest ? quest.good + '/' + QUEST_MAX : '—'}</b><span>${game ? 'иммунитет в игре «Путь пяти городов»' : 'верных решений в квесте'}</span></div>
+    const tiles = [
+      ['#/quest', 'assets/t-osh.jpg', 'Путь пяти городов'],
+      ['#/dozor', 'assets/t-karakol.jpg', 'Дозор'],
+      ['#/check', 'assets/t-talas.jpg', 'Реальные истории']
+    ].map(([h, img, t]) => `<a class="tile" href="${h}"><div class="tile-img" style="background-image:url(${img})"></div><div class="tile-t"><span>${t}</span>${ARROW}</div></a>`).join('');
+    const ev = evs.slice(0, 5).map((e, i) => `<a class="ecard ${i === 0 ? 'big' : ''}" href="#/events" style="background-image:url(${EIMG[i % EIMG.length]})"><span class="e-cat">${esc(e.cat)}</span><h3>${esc(e.title)}</h3>${i === 0 ? `<p>${esc(e.desc)}</p>` : ''}<span class="e-date">${esc(e.date)} · ${esc(e.place)}</span></a>`).join('');
+    return `<div class="home-wrap">
+      <section class="hero2">
+        <div class="hero2-text">
+          <span class="eyebrow">Цифровой иммунитет молодёжи</span>
+          <h1>Знающий человек <em>сам останавливает</em> манипулятора</h1>
+          <p>Квест, тренажёр и разборы реальных историй. Без регистрации, без сбора данных.</p>
+          <div class="row"><a class="btn" href="#/quest">Пройти квест <span aria-hidden="true">→</span></a><a class="btn ghost" href="#/trainer">Тренажёр</a></div>
+          <div class="hero2-stats">
+            <div class="stat"><b>${best ? imm + '%' : '—'}</b><span>твой иммунитет (лучший раунд)</span><div class="meter" style="margin-top:8px"><i style="width:${imm}%"></i></div></div>
+            <div class="stat"><b>${game ? game.immun + '%' : quest ? quest.good + '/' + QUEST_MAX : '—'}</b><span>${game ? 'иммунитет в игре «Путь пяти городов»' : 'верных решений в квесте'}</span></div>
+          </div>
         </div>
+        <div class="hero2-img" style="background-image:url(assets/t-akbuura.jpg)" role="img" aria-label=""></div>
       </section>
-      ${postHtml(posts[0])}${posts[1] ? postHtml(posts[1]) : ''}
-      ${afisha}
-      ${posts.slice(2).map(postHtml).join('')}
+      <div class="orn-divider" aria-hidden="true"><svg viewBox="0 0 64 32"><use href="#horn"/></svg></div>
+      <section class="trio" aria-label="Игры и истории">${tiles}</section>
+      <div class="cols">
+        <section>
+          <h2 class="sec hd">Главное<a href="#/news">Все новости <span aria-hidden="true">→</span></a></h2>
+          <div class="ngrid">${posts.slice(0, 6).map(ncard).join('')}</div>
+        </section>
+        <aside class="lent">
+          <h2 class="sec hd">Лента новостей</h2>
+          <ul>${posts.slice(0, 7).map(p => `<li data-act="post" data-id="${esc(p.id)}" role="button" tabindex="0"><time>${esc(p.date)}</time><b>${esc(p.title)}</b></li>`).join('')}</ul>
+          <a class="more" href="#/news">Все новости <span aria-hidden="true">→</span></a>
+        </aside>
+      </div>
+      <section class="dark-sec" aria-label="Афиша">
+        <div class="dark-head"><div><h2>Призываем к хорошему</h2><p>Учёба, конкурсы, хакатоны и события, которые стоит посетить. Выбери, чем занять энергию.</p></div><a class="btn" href="#/events">Вся афиша</a></div>
+        <div class="egrid">${ev}</div>
+      </section>
       <p class="notice">Публикации — демонстрационные. В рабочей версии их размещают уполномоченные операторы через админ-панель. Комментариев нет: только реакции.</p>
     </div>`;
   };
+
+  V.news = () => `<div class="page wide">
+    <div class="page-head"><h1>Новости</h1><p>Предупреждения о новых схемах, разборы и советы. Публикуют уполномоченные операторы.</p></div>
+    <div class="ngrid">${allPosts().map(ncard).join('')}</div>
+  </div>`;
+
+  V.dozor = () => `<div class="page wide">
+    <div class="row"><a class="btn ghost sm" href="#/quest">← Квесты</a></div>
+    <iframe class="dozor-frame" src="games/dozor.html?v=13" title="Дозор" allow="fullscreen"></iframe>
+  </div>`;
+
+  // Поиск по материалам
+  V.search = () => {
+    const qs = new URLSearchParams((location.hash.split('?')[1] || '')); const q = (qs.get('q') || '').trim().toLowerCase();
+    const tr = s => (window.I18N ? I18N.tr(s) : s);
+    const hit = (...f) => { const h = f.map(x => String(x || '')).join(' ').toLowerCase() + ' ' + f.map(x => tr(String(x || ''))).join(' ').toLowerCase(); return q && h.includes(q); };
+    const res = [];
+    allPosts().forEach(p => { if (hit(p.title, p.text, p.tag)) res.push(['Новость', p.title, p.text, `data-act="post" data-id="${esc(p.id)}"`]); });
+    allEvents().forEach(e => { if (hit(e.title, e.desc, e.cat, e.place)) res.push(['Событие', e.title, e.desc, 'data-href="#/events"']); });
+    (D.realStories || []).forEach(s => { if (hit(s.title, s.text.join(' '), s.note)) res.push(['Реальная история', s.title, s.text[0], 'data-href="#/check"']); });
+    D.stories.forEach(s => { if (hit(s.title, s.contact, s.hook, s.tag)) res.push(['Учебная история', s.title, s.contact, 'data-href="#/check"']); });
+    D.checklist.forEach(c => { if (hit(c.q, c.a)) res.push(['Медиаграмотность', c.q, c.a, 'data-href="#/check"']); });
+    return `<div class="page"><div class="page-head"><h1>Результаты поиска</h1><p>${q ? '«' + esc(qs.get('q')) + '»' : 'Введи запрос в строке поиска.'}</p></div>
+      ${q ? `<p class="notice" style="text-align:left">Найдено: ${res.length}</p>` : ''}
+      <div class="ev-list">${res.map(([k, t, d, at]) => `<article class="card post" ${at} role="button" tabindex="0" style="cursor:pointer"><span class="eyebrow">${k}</span><h3>${esc(tr(t))}</h3><p>${esc(tr(d).slice(0, 180))}…</p></article>`).join('')}</div>
+      ${q && !res.length ? '<div class="empty">Ничего не найдено. Попробуй другое слово.</div>' : ''}</div>`;
+  };
+
+  function openPost(id) {
+    const p = allPosts().find(x => String(x.id) === String(id)); if (!p) return;
+    const on = reacted()[p.id], n = p.likes + (on ? 1 : 0);
+    $('#modal-body').innerHTML = `<div class="post-modal" style="display:grid;gap:12px">
+      <div class="pm-img" style="${NIMG[p.id] ? `background-image:url(${NIMG[p.id]})` : 'background:var(--soft)'}"></div>
+      <span class="eyebrow">${esc(p.tag)} · ${esc(p.date)}</span><h2>${esc(p.title)}</h2><p>${esc(p.text)}</p>
+      <div class="react"><button data-act="react-m" data-id="${esc(p.id)}" aria-pressed="${!!on}">Полезно · ${n}</button><button data-act="share" data-id="${esc(p.id)}">Поделиться</button></div></div>`;
+    const d = $('#modal'); if (!d.open) d.showModal();
+  }
 
   // Афиша
   V.events = () => {
@@ -123,9 +177,12 @@
       const g = LS.get('ob_game', null);
       return `<div class="page">
       <div class="page-head"><span class="eyebrow">Квесты</span><h1>Выбери приключение</h1><p>Проживи опасные ситуации в безопасной игре. Результат хранится только у тебя в браузере.</p></div>
-      <article class="card rim game-card"><div class="gc-img" style="background-image:url(assets/bg-bishkek.png)"><span class="badge">Новая игра</span></div>
+      <article class="card rim game-card"><div class="gc-img" style="background-image:url(assets/t-bishkek.jpg)"><span class="badge">Новая игра</span></div>
         <div class="post"><h3>Путь пяти городов</h3><p>Бишкек, Ош, Каракол, Талас и Ак-Буура. В каждом городе ты получишь подозрительное сообщение: найди красные флаги и выбери, как ответить. Тебе помогут Актан, Акылай, Байболот, Аруузат и Талгат.</p>
         <div class="row"><button class="btn" data-act="g-start">${g ? 'Пройти заново' : 'Играть'}</button>${g ? `<span class="badge ok">Твой иммунитет: ${g.immun}%</span>` : '<span class="badge">5 глав · около 10 минут</span>'}</div></div></article>
+      <article class="card rim game-card"><div class="gc-img" style="background-image:url(assets/t-karakol.jpg)"><span class="badge">Новая игра</span></div>
+        <div class="post"><h3>Дозор</h3><p>Изометрическая игра: помоги школьникам остановить вербовку и проверить слухи. 9 уровней.</p>
+        <div class="row"><a class="btn" href="#/dozor">Играть</a><span class="badge">9 уровней</span></div></div></article>
       <article class="card post"><h3>Быстрый квест «${esc(D.quest.title)}»</h3><p>6 ситуаций в одной переписке. Около 4 минут.</p>
         <div class="row"><button class="btn ghost" data-act="q-start">Начать</button></div></article>
     </div>`;
@@ -258,8 +315,9 @@
 
   // Проверка
   V.check = () => {
-    const tabs = [['stories', 'Истории'], ['media', 'Медиаграмотность'], ['verify', 'Проверка контента']];
+    const tabs = [['real', 'Реальные истории'], ['stories', 'Учебные истории'], ['media', 'Медиаграмотность'], ['verify', 'Проверка контента']];
     let body = '';
+    if (checkTab === 'real') body = `<div class="real-hero"><h2>Реальные истории</h2><p>${esc(D.realIntro)}</p></div><div class="real">${D.realStories.map(s => `<article class="card"><div class="date">${esc(s.meta)}</div><h2>${esc(s.title)}</h2>${s.text.map(x => `<p>${esc(x)}</p>`).join('')}<p class="point"><strong>${esc(s.noteLabel)}</strong> ${esc(s.note)}</p><p class="source"><a target="_blank" rel="noopener" href="${esc(s.url)}">${esc(s.source)}</a></p></article>`).join('')}</div>`;
     if (checkTab === 'stories') body = D.stories.map(s => `<article class="card story"><details><summary><div><span class="badge">${esc(s.tag)}</span><h3 style="margin-top:6px">${esc(s.title)}</h3></div></summary>
       <div class="steps">
         <div class="step"><span class="dot"></span><div><b>Контакт</b><p>${esc(s.contact)}</p></div></div>
@@ -293,7 +351,7 @@
   V.report = () => reportSent ? `<div class="page"><div class="card rim hero"><span class="eyebrow">Обращение отправлено</span><h1>Спасибо, что рассказал</h1><p>Номер обращения: <b>#${reportSent}</b>. Его увидит оператор. Мы не требуем имени и не собираем данные о тебе.</p><div class="row"><button class="btn" data-act="r-again">Ещё одно</button><a class="btn ghost" href="#/support">Нужна поддержка?</a></div></div></div>` : `<div class="page">
     <div class="page-head"><span class="eyebrow">Сообщить</span><h1>Расскажи, что произошло</h1><p>Обращение уходит только если ты сам нажмёшь «Отправить». Это добровольно, без слежки. Мы не оцениваем тебя.</p></div>
     <form class="card post" data-form="report">
-      <div class="field"><label for="rc">Что случилось?</label><select id="rc" required>${CATS.map(c => `<option>${esc(c)}</option>`).join('')}</select></div>
+      <div class="field"><label for="rc">Что случилось?</label><select id="rc" required>${CATS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></div>
       <div class="field"><label for="rt">Опиши ситуацию</label><textarea id="rt" required minlength="10" maxlength="1500" placeholder="Что написали, как познакомились, что просят"></textarea></div>
       <div class="field"><label for="rl">Ссылка на профиль или сообщение (по желанию)</label><input id="rl" type="url" placeholder="https://"></div>
       <div class="alert">Не указывай свой пароль, номера карт и коды из СМС.</div>
@@ -351,8 +409,8 @@
     clearInterval(timerId);
     let r = route(); if (!V[r]) r = 'home';
     $('#view').innerHTML = V[r]();
-    $$('#dock a').forEach(a => a.toggleAttribute('aria-current', a.dataset.tab === r));
-    $$('#dock a[aria-current]').forEach(a => a.setAttribute('aria-current', 'page'));
+    const tab = ({ dozor: 'quest', news: 'home', search: '' })[r] ?? r;
+    $$('#dock a, #mainnav a').forEach(x => { if (x.dataset.tab === tab) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current'); });
     if (V[r].mount) V[r].mount();
     if (!keepScroll) window.scrollTo({ top: 0 });
   }
@@ -360,7 +418,9 @@
 
   /* ---------- действия ---------- */
   document.addEventListener('click', e => {
-    const lb = e.target.closest('[data-lang]'); if (lb) { lang = lb.dataset.lang; LS.set('ob_lang', lang); applyLang(); buildDock(); render(true); return; }
+    const lb = e.target.closest('[data-lang]'); if (lb) { lang = lb.dataset.lang; LS.set('ob_lang', lang); if (window.I18N) I18N.set(lang); applyLang(); buildDock(); setToday(); render(true); syncFrame(); return; }
+    if (e.target.closest('#theme')) { const dark = document.documentElement.getAttribute('data-theme') !== 'dark'; if (dark) document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme'); LS.set('ob_theme', dark ? 'dark' : 'light'); syncFrame(); return; }
+    const hr = e.target.closest('[data-href]'); if (hr) { location.hash = hr.dataset.href; return; }
     const el = e.target.closest('[data-act]'); if (!el) return;
     const a = el.dataset.act, k = el.dataset.k;
     switch (a) {
@@ -369,6 +429,8 @@
       case 'react': { const r = reacted(); r[el.dataset.id] = !r[el.dataset.id]; LS.set('ob_react', r); render(true); break; }
       case 'share': { const u = location.href.split('#')[0]; if (navigator.share) navigator.share({ title: 'Ойгон', url: u }).catch(() => {}); else navigator.clipboard && navigator.clipboard.writeText(u).then(() => { el.textContent = 'Ссылка скопирована'; }); break; }
       case 'evcat': evCat = el.dataset.c; render(true); break;
+      case 'post': openPost(el.dataset.id); break;
+      case 'react-m': { const r = reacted(); r[el.dataset.id] = !r[el.dataset.id]; LS.set('ob_react', r); openPost(el.dataset.id); break; }
       case 'chk': checkTab = k; render(true); break;
       // квест
       case 'q-start': Q = { i: 0, good: 0, picked: null, picks: [], lead: '', done: false }; render(); break;
@@ -382,7 +444,7 @@
       case 't-start': { const lvl = +el.dataset.l; TR = { level: lvl, items: shuffle(D.msgs.filter(m => m.lvl === lvl)).slice(0, 10), i: 0, score: 0, streak: 0, ok: 0, miss: [], last: null, done: false }; render(); break; }
       case 't-pick': trAnswer(k); break;
       case 't-next': if (TR.i === TR.items.length - 1) { TR.done = true; const pct = Math.round(TR.ok / TR.items.length * 100), b = LS.get('ob_best', null); if (!b || pct > b.pct || (pct === b.pct && TR.score > b.score)) LS.set('ob_best', { pct, score: TR.score }); } else { TR.i++; TR.last = null; } render(); break;
-      case 't-share': { const pct = Math.round(TR.ok / TR.items.length * 100), txt = `Мой цифровой иммунитет в «Ойгон»: ${pct}%. А твой?`; if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else navigator.clipboard && navigator.clipboard.writeText(txt).then(() => { el.textContent = 'Скопировано'; }); break; }
+      case 't-share': { const pct = Math.round(TR.ok / TR.items.length * 100), txt = (window.I18N ? I18N.tr : String)(`Мой цифровой иммунитет в «Ойгон»: ${pct}%. А твой?`); if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else navigator.clipboard && navigator.clipboard.writeText(txt).then(() => { el.textContent = 'Скопировано'; }); break; }
       case 'r-again': reportSent = null; render(); break;
       // админка
       case 'atab': adminTab = k; render(true); break;
@@ -414,6 +476,20 @@
     }
   });
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') e.target.close(); });
+  document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[role=button][data-act],[role=button][data-href]')) { e.preventDefault(); e.target.click(); } });
+  $('#search').addEventListener('submit', e => { e.preventDefault(); const v = $('#q').value.trim(); if (v) location.hash = '#/search?q=' + encodeURIComponent(v); });
 
-  applyLang(); buildDock(); render();
+  function setToday() {
+    const el = $('#today'); if (!el) return;
+    try { const d = new Date().toLocaleDateString(lang === 'ky' ? 'ky-KG' : 'ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); el.textContent = d.charAt(0).toUpperCase() + d.slice(1); } catch { el.textContent = new Date().toLocaleDateString(); }
+  }
+  function syncFrame() {
+    const fr = $('.dozor-frame'); if (!fr) return;
+    try {
+      const w = fr.contentWindow; if (w.I18N) w.I18N.set(lang);
+      if (document.documentElement.getAttribute('data-theme') === 'dark') w.document.documentElement.setAttribute('data-theme', 'dark'); else w.document.documentElement.removeAttribute('data-theme');
+    } catch { }
+  }
+
+  applyLang(); buildDock(); setToday(); render();
 })();

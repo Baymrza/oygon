@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Дозор — против экстремистской вербовки</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f1f4e6;color:#23392a;font:16px system-ui,sans-serif}main{max-width:1240px;margin:auto;padding:20px}header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:13px}h1{margin:0;font-size:clamp(24px,4vw,35px)}header p{margin:3px 0 0;color:#435e4d}button{font:inherit;font-weight:650;color:#23392a;background:#fffdf3;border:1px solid #bfcbb2;border-radius:11px;padding:10px 14px;cursor:pointer}button:hover:not(:disabled){background:#e5f0d5}button:focus-visible{outline:3px solid #176a56;outline-offset:2px}button:disabled{opacity:.46;cursor:default}.primary{background:#265d42;color:white;border-color:#265d42}.primary:hover:not(:disabled){background:#337655}nav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}nav button[aria-current]{background:#d5e9c2;border-color:#67905c}.stage{position:relative;border-radius:20px;overflow:hidden;background:#c3dda7;min-height:440px;height:min(68vh,650px);border:1px solid #a7bd93}canvas{width:100%;height:100%;display:block;touch-action:manipulation}.objective{position:absolute;top:14px;left:14px;max-width:min(390px,calc(100% - 28px));background:#fffdf3f5;border-radius:13px;padding:11px 14px;box-shadow:0 4px 16px #2b482323;pointer-events:none}.objective strong{display:block}.objective span{font-size:14px}.pad{position:absolute;bottom:15px;left:15px;display:grid;grid-template-columns:repeat(3,42px);gap:4px}.pad button{padding:0;height:41px;font-size:22px;background:#fffdf3ee}.interact{position:absolute;right:15px;bottom:15px;max-width:50%}.footer{margin:10px 2px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#435e4d;font-size:14px}dialog{border:1px solid #a7bd93;border-radius:18px;background:#fffdf3;color:#23392a;box-shadow:0 15px 50px #1f3b3d50;width:min(540px,calc(100% - 24px));padding:22px}dialog::backdrop{background:#20362488}dialog h2{margin:0 0 10px}dialog p{line-height:1.5}.choices{display:grid;gap:8px;margin:15px 0}.choices button{text-align:left}.feedback{background:#edf3df;border-radius:8px;padding:10px}.feedback:empty{display:none}.modal-footer{display:flex;justify-content:space-between;gap:10px}.count{white-space:nowrap;font-size:14px}@media(max-width:550px){main{padding:9px}.stage{height:65vh;min-height:420px}nav button{font-size:13px;padding:7px}.count{font-size:12px}}
+#map{color:#e4edf8;background:#101723;border-color:#3b495d;width:min(960px,calc(100% - 22px));padding:20px}#map header{align-items:start}#map h2{margin:0}#map p{color:#b8c6db;margin:5px 0}.map-scroll{overflow:auto;border:1px solid #2d394e;border-radius:13px;background:radial-gradient(circle,#28364a 1px,transparent 1.5px) 0 0/19px 19px,#111925}.map-grid{position:relative;width:774px;height:614px}.map-line{position:absolute;height:0;border-top:2px dashed #52627a;transform-origin:left}.map-line.done{border-top:3px solid #62d9b6}.node{position:absolute;width:126px;text-align:center;transform:translateX(-50%);display:grid;justify-items:center;gap:4px}.node button{width:62px;height:59px;padding:0;background:#232e41;color:#dfe9ff;border:2px solid #52627a;font-size:23px}.node button:disabled{opacity:.65}.node button.available{border-color:#f2bc60;color:#ffd068;background:#403221}.node button.passed{border-color:#51c9a6;color:#73eac6;background:#183d36}.node button[aria-current]{outline:2px solid #b5c9f7;outline-offset:3px}.node strong{font-size:13px}.node small{font-size:11px;color:#aebed7}.branch{position:absolute;left:20px;color:#b9cce7;font-size:14px;letter-spacing:.03em}.map-legend{padding-top:9px;font-size:13px}.map-bar{display:flex;gap:9px;margin-bottom:12px;align-items:center}.mode-controls{display:flex;gap:8px;flex-wrap:wrap}.choices button[aria-pressed=true]{background:#d5e9c2;border-color:#528263}
+.evidence-columns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.evidence-columns section{border:1px solid #becbb1;border-radius:10px;background:#edf3e4;padding:9px;min-height:68px}.evidence-columns h3{font-size:14px;margin:0 0 7px}.evidence-list{display:grid;gap:6px}.evidence-list article{border:1px solid #cdd6c3;border-radius:8px;background:#fffdf6;padding:8px}.evidence-list p{font-size:13px;margin:0 0 5px}.evidence-actions{display:flex;flex-wrap:wrap;gap:4px}.evidence-actions button{padding:4px 6px;font-size:11px}
+</style>
+<script>try{var t=JSON.parse(localStorage.getItem('ob_theme'));if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Serif:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* оформление под сайт «Ойгон»: тёплая кремово-красная палитра */
+body{background:#f7f1e6;color:#1c1a17;font-family:'Noto Sans',system-ui,sans-serif}
+h1,h2{font-family:'Noto Serif',Georgia,serif}
+header p,.footer{color:#6a6357}
+button{color:#1c1a17;background:#fffaf1;border-color:#e3d7c2}
+button:hover:not(:disabled){background:#f3e8d4}
+button:focus-visible{outline-color:#b3252c}
+.primary{background:#b3252c;border-color:#b3252c;color:#fff}
+.primary:hover:not(:disabled){background:#8f1d24}
+nav button[aria-current]{background:#f0d9d0;border-color:#b3252c}
+.stage{border-color:#e3d7c2}
+.objective{background:#fffaf1f5;color:#1c1a17}
+dialog{background:#fffaf1;color:#1c1a17;border-color:#e3d7c2}
+dialog::backdrop{background:#17140f99}
+.feedback{background:#f4ead8}
+#map{background:#17140f;border-color:#3a3226}
+:root[data-theme="dark"] body{background:#0f1316;color:#eef0ec}
+:root[data-theme="dark"] header p,:root[data-theme="dark"] .footer{color:#9aa5a3}
+:root[data-theme="dark"] button{background:#1f272c;color:#eef0ec;border-color:#2a343a}
+:root[data-theme="dark"] button:hover:not(:disabled){background:#2a343a}
+:root[data-theme="dark"] .primary{background:#e0545a;border-color:#e0545a;color:#12100c}
+:root[data-theme="dark"] .objective,:root[data-theme="dark"] dialog{background:#171d21f5;color:#eef0ec;border-color:#2a343a}
+:root[data-theme="dark"] .feedback{background:#202830}
+</style>
+
+<main>
+<header><div><h1>Дозор</h1><p>После звонка · история о вербовке в школьном чате</p></div><strong class="count" id="progress"></strong></header>
+<div class="map-bar"><button id="showMap" class="primary">Все уровни</button><span id="story"></span></div>
+<section class="stage" aria-label="Игровая сцена">
+<canvas id="world" aria-label="Трёхмерный двор. Управление стрелками или экранными кнопками."></canvas>
+<div class="objective"><strong id="mission"></strong><span id="objective"></span></div>
+<div class="pad" aria-label="Передвижение"><span></span><button data-dir="0,-1" aria-label="Север">↗</button><span></span><button data-dir="-1,0" aria-label="Запад">↖</button><button data-dir="0,1" aria-label="Юг">↙</button><button data-dir="1,0" aria-label="Восток">↘</button></div>
+<button id="interact" class="primary interact"></button>
+</section>
+<div class="footer"><span>Стрелки или WASD · нажми на метку, чтобы подойти · E для действия</span><span id="status" role="status"></span></div>
+</main>
+<dialog id="dialog"><div class="map-bar"><button id="scenarioMap">← Все уровни</button></div><h2 id="scenarioTitle"></h2><p id="scenario"></p><div id="choices" class="choices"></div><p id="feedback" class="feedback" aria-live="polite"></p><div class="modal-footer"><button id="close">Вернуться во двор</button><button id="advance" class="primary" hidden></button></div></dialog>
+<dialog id="map"><header><div><h2>Карта уровней</h2><p>Выбери эпизод. Линии показывают, какие уровни открываются дальше.</p></div><button id="closeMap" aria-label="Закрыть карту">✕</button></header><div class="map-scroll"><div id="mapGrid" class="map-grid"></div></div><p class="map-legend">✓ Пройдено · ◆ Доступно · 🔒 Требуется предыдущий уровень</p></dialog>
+<script src="../i18n-ky.js?v=13"></script>
+<script src="../i18n-ky2.js?v=13"></script>
+<script src="../i18n.js?v=13"></script>
+<script>
+const missions=[
+ {title:"Приглашение",place:"Айдана",point:[3,1],goal:"Айдана ждёт у скамейки. Узнай, что ей написал незнакомец.",scenario:"После уроков Айдана показывает тебе телефон. В школьном чате кто-то заметил, что её одноклассник Тимур недавно поссорился с друзьями. Теперь незнакомец пишет им обоим, обещает поддержку и зовёт в закрытую группу, где оправдывают насилие. Он просит никому не показывать переписку.",question:"Что посоветуешь Айдане?",options:[
+ ["Попросить прислать ссылку на группу","Переход по ссылке продолжит контакт. Здесь уже есть два тревожных признака: оправдание насилия и требование секретности."],
+ ["Пожаловаться на сообщение и заблокировать отправителя","Жалоба передаёт сообщение на проверку платформе. Блокировка помогает прекратить контакт.",true],
+ ["Переслать приглашение всему классу","Пересылка распространяет приглашение. Для помощи можно рассказать о ситуации взрослому, которому доверяешь."]]},
+ {title:"Обрезанный скриншот",place:"Мира",point:[1,0],goal:"Подойди к Мире у входа. Она видела публикацию, которую переслал Тимур.",scenario:"Айдана отправила жалобу. Тем временем Тимур уже переслал в классный чат обрезанный скриншот из закрытой группы. Мира заметила, что из скриншота вырезаны дата и начало разговора. Подпись обвиняет целую группу людей.",question:"Как вы с Мирой проверите утверждение?",options:[
+ ["Поверить, если скриншот прислали несколько друзей","Количество пересылок ничего не говорит о достоверности исходного сообщения."],
+ ["Переслать скриншот с подписью «Правда ли?»","Даже с вопросом пересылка распространяет обвинение. Проверить его можно без публикации."],
+ ["Найти исходную публикацию и сверить контекст","Оригинал, дата и независимое подтверждение помогают оценить утверждение. Обвинение в адрес целой группы само по себе ничего не доказывает.",true]]},
+ {title:"Разговор с Тимуром",place:"Тимур",point:[3,3],goal:"Найди Тимура у выхода со двора и поговори с ним наедине.",scenario:"Вы с Мирой нашли исходную публикацию: скриншот искажал смысл разговора. Тимур признаётся, что в группе его сначала выслушали, а теперь давят на него и подталкивают к насилию. Он боится, что в школе будут винить его за пересылку.",question:"Что скажешь Тимуру?",options:[
+ ["Выслушать и предложить вместе поговорить со взрослым, которому вы доверяете","Спокойный разговор помогает другу обратиться за поддержкой. Можно вместе обсудить блокировку и жалобу.",true],
+ ["Пристыдить друга перед классом","Публичное обвинение может усилить страх и заставить друга замолчать."],
+ ["Пообещать держать всё в секрете","Если человека склоняют к насилию, помощь взрослого важнее обещания молчать."]]},
+ {title:"Сообщение учителю",place:"Эльмира эже",point:[0,1],goal:"Подойди к Эльмире эже у крыльца. Тимур согласился поговорить с ней вместе с тобой.",scenario:"По пути к учителю Тимур замечает в чате конкретную угрозу насилия в школе. Эльмира эже уже во дворе. Тимур показывает тебе сообщение и спрашивает, как поступить.",question:"Какой шаг вы сделаете первым?",options:[
+ ["Вступить в перепалку с автором сообщения","Спор отнимает время и может усилить конфликт. Рядом есть взрослый, который может помочь."],
+ ["Сразу показать сообщение учителю и отойти в безопасное место","При конкретной угрозе важно быстро сообщить взрослому и уйти из опасной зоны. При непосредственной опасности обращаются в местные экстренные службы.",true],
+ ["Подождать, пока другие решат, серьёзна ли угроза","Ожидание задерживает помощь. Сообщи взрослому сразу, даже если подлинность угрозы ещё предстоит проверить."]]}
+ ,{title:"Громкий заголовок",place:"Нур",point:[2,1],goal:"Нур у входа. Разберите карточку, которую переслали в школьное медиа.",mode:"inspect",scenario:"Школьному медиа прислали картинку с обвинением и призывом «перешли всем». На карточке есть фрагмент цитаты. Какие два пункта реально помогут проверить её?",options:[
+ ["Найти полную запись и сравнить цитату с оригиналом","",true],
+ ["Посмотреть, собрала ли картинка много реакций",""],
+ ["Сверить дату, автора и контекст исходной записи","",true],
+ ["Попросить друзей переслать карточку дальше",""]],
+ result:"Полная запись и сведения об источнике помогают обнаружить искажение. Число реакций не подтверждает содержание."},
+ {title:"Редакционный выбор",place:"Лейла",point:[3,2],goal:"Поговори с Лейлой у скамейки. Она готовит пост для школьного канала.",scenario:"Оригинал подтвердил, что цитату вырвали из контекста. Школьный канал хочет объяснить ситуацию, пока ложное обвинение расходится по чатам.",question:"Как исправить ошибку?",options:[
+ ["Опубликовать краткое исправление со ссылкой на оригинал","Читатели увидят проверяемый источник, а исправление не повторит ложное обвинение в заголовке.",true],
+ ["Повторить ложное обвинение крупным заголовком","Даже под опровержением яркий ложный заголовок может разойтись отдельно."],
+ ["Предложить подписчикам найти и пристыдить автора","Травля может затронуть непричастных и не помогает проверить информацию."]]},
+ {title:"Навязчивый куратор",place:"Бек",point:[2,3],goal:"Бек ждёт у выхода. Помоги ему составить план после разговора в игровом чате.",mode:"order",scenario:"В игровом чате незнакомый «куратор» оправдывает насилие и требует продолжить беседу в личке. Прямой угрозы сейчас нет. Разложи предложенные шаги по порядку: прекратить разговор, передать жалобу через меню сообщения, затем заблокировать контакт.",options:[
+ ["Заблокировать контакт и прекратить получение сообщений","",3],
+ ["Перестать отвечать и не переходить по ссылкам","",1],
+ ["Отправить жалобу через меню сообщения","",2]],
+ result:"Так Бек прекращает разговор, передаёт сообщение на проверку и ограничивает дальнейший контакт."},
+ {title:"Поддержка после чата",place:"Дина эже",point:[0,1],goal:"Подойди к Дине эже. Бек хочет рассказать о случившемся взрослому.",scenario:"Даже после блокировки Бек беспокоится, что его будут осуждать за то, что он вообще ответил незнакомцу. Он просит помочь начать разговор с Диной эже.",question:"Как начать этот разговор?",options:[
+ ["Рассказать о переписке при всех без согласия Бека","Публичность может помешать Беку попросить о помощи."],
+ ["Предложить поговорить наедине и остаться рядом, если Бек этого хочет","Так Бек может рассказать о давлении в спокойной обстановке и получить поддержку.",true],
+ ["Посоветовать больше никому об этом не говорить","Поддержка взрослого помогает справиться с переживаниями и обсудить следующий безопасный шаг."]]}
+ ,{title:"Три версии",mode:"investigate",goal:"В чате обвиняют Арсена в распространении призывов к насилию. Поговори с тремя свидетелями и выясни, что они видели.",
+ witnesses:[
+  {place:"Самира",point:[3,1],note:"Я видела обрезанный скриншот в классном чате. На нём был ответ Арсена «он прав», но сообщение, на которое он отвечал, не попало в кадр."},
+  {place:"Данияр",point:[1,0],note:"Я видел полный фрагмент переписки. Арсен отвечал на предложение закрыть спор. Призыв к насилию написал другой аккаунт."},
+  {place:"Алина",point:[3,3],note:"Мне сказали, что аккаунтом якобы управляет Арсен. Я не видела, кто им пользуется, а тот, кто мне это сказал, сослался на слух в другом чате."}
+ ],
+ cards:[
+  ["Автор другого аккаунта — Арсен.",false],
+  ["На обрезанном скриншоте отсутствовало сообщение, на которое ответил Арсен.",true],
+  ["Арсен поддержал призыв к насилию словами «он прав».",false],
+  ["В полном фрагменте ответ Арсена относится к предложению закрыть спор.",true],
+  ["Призыв к насилию появился под именем другого аккаунта.",true],
+  ["Арсен и автор сообщения действовали по договорённости.",false]
+ ]}
+];
+const treeNodes=[
+ [90,102,-1],[280,102,0],[470,102,1],[660,102,2],
+ [280,240,0],[470,240,4],[280,379,0],[470,379,6],[280,518,0]
+];
+const $=id=>document.getElementById(id), canvas=$("world"), ctx=canvas.getContext("2d");
+const storageKey="dozor-map-v3";
+let completed=new Set();
+try{
+ const saved=JSON.parse(localStorage.getItem(storageKey));
+ const legacy=Math.min(4,Number(localStorage.getItem("dozor-actions-v2"))||0);
+ completed=new Set(Array.isArray(saved)?saved.filter(id=>Number.isInteger(id)&&treeNodes[id]):[0,1,2,3].slice(0,legacy));
+}catch{}
+const unlocked=i=>i===0||completed.has(treeNodes[i][2]);
+const story=i=>i<4?"После звонка":i<6?"Школьное медиа":i<8?"Игровой чат":"Расследование во дворе";
+const mode=i=>({inspect:"Проверка источника",order:"План действий",investigate:"Сбор показаний"}[missions[i].mode]||"Диалог");
+let index=0, player=[0,3], visual=[...player], route=[], facing=[0,-1], moving=false, correct=false, last=0, marker=[0,0];
+let witnessCount=0;
+const target=()=>missions[index].witnesses?.[witnessCount]??missions[index];
+const forest=[[-1.65,1.4,1.2],[4.65,.45,1.18],[-1.65,3.3,.9],[4.45,3.25,.94]];
+const colors={wood:["#d7a36a","#b78148","#9b6335"],path:["#e0c48e","#cfb17a","#c6a674"],leaf:["#7fac43","#5c9032","#417d31"],wall:["#f0eadb","#ddd9c3","#bdbba7"]};
+const faces=[];
+let width=0,height=0,scale=0,centerX=0,centerY=0;
+function depth(x,z){return x*.45+z*.89;}
+function project([x,y,z]){
+ const d=depth(x-1.65,z-1.55), perspective=1/(1-.046*(d+y*.4));
+ return [centerX+((x-1.65)*.89-(z-1.55)*.45)*scale*perspective,centerY+(d*.63-y*.81)*scale*perspective];
+}
+function face(vertices,color){
+ const distance=vertices.reduce((n,[x,y,z])=>n+depth(x,z)+y*.76,0)/vertices.length;
+ faces.push({vertices,color,distance});
+}
+function slab(x,z,w,d,y,color){face([[x,y,z],[x+w,y,z],[x+w,y,z+d],[x,y,z+d]],color);}
+function box(x,y,z,w,h,d,p){
+ const X=x+w,Y=y+h,Z=z+d;
+ slab(x,z,w,d,Y,p[0]);
+ face([[x,y,Z],[X,y,Z],[X,Y,Z],[x,Y,Z]],p[1]);
+ face([[X,y,z],[X,y,Z],[X,Y,Z],[X,Y,z]],p[2]);
+}
+function round(x,y,z,r,h,ris,sides,p){
+ const ring=(r,y)=>Array.from({length:sides},(_,i)=>[x+r*Math.cos(i*2*Math.PI/sides),y,z+r*Math.sin(i*2*Math.PI/sides)]);
+ const a=ring(r,y),b=ring(ris,y+h);
+ for(let i=0;i<sides;i++){
+   const j=(i+1)%sides, angle=(i+.5)*2*Math.PI/sides;
+   if(Math.cos(angle)*.45+Math.sin(angle)*.89>-.16)face([a[i],a[j],b[j],b[i]],p[1+i%(p.length-1)]);
+ }
+ if(ris)face(b,p[0]);
+}
+function poly(points,color){
+ ctx.beginPath();
+ points.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));
+ ctx.closePath();ctx.fillStyle=color;ctx.fill();
+}
+function flat(x,z,rx,rz,c){
+ poly(Array.from({length:22},(_,i)=>{const a=i*Math.PI/11;return project([x+Math.cos(a)*rx,.003,z+Math.sin(a)*rz]);}),c);
+}
+function tree(x,z,s){
+ box(x-.07,0,z-.07,.14,.66*s,.14,colors.wood);
+ round(x,.48*s,z,.24*s,.44*s,.48*s,7,colors.leaf);
+ round(x,.92*s,z,.48*s,.51*s,.37*s,7,colors.leaf);
+ round(x,1.43*s,z,.37*s,.61*s,0,7,colors.leaf);
+}
+function character(x,z,npc=false){
+ const [dx,dz]=npc?[0,1]:facing, twist=dx!==0, stride=moving&&!npc?Math.sin(last/67)*.052:0;
+ const legs=["#496879","#344d64","#273744"], boots=["#3a433e","#2d352f","#211f1e"], red=npc?[["#79a65f","#517945","#41613a"],["#b488bc","#885e91","#66416f"],["#5391be","#35648e","#294d72"],["#b78655","#92653e","#69482e"]][index%4]:["#da503c","#ae3225","#862521"], skin=["#ffe0af","#f3c190","#d69a6a"];
+ for(const k of [-1,1]){
+   const a=k*.082,b=k*stride;
+   const px=x+(twist?b:a),pz=z+(twist?a:b);
+   box(px-.054,.05,pz-.055,.108,.26,.11,legs);
+   box(px-.061,0,pz-.072,.122,.09,.144,boots);
+   const ax=x+(twist?0:k*.187),az=z+(twist?k*.187:0);
+   box(ax-.05,.306,az-.053,.10,.20,.106,skin);
+   box(ax-.055,.437,az-.057,.11,.13,.114,["#fff8d8","#ebe6cf","#c3c4b1"]);
+ }
+ round(x,.275,z,.14,.043,.151,10,["#e8b04e","#e7a846","#ad732e"]);
+ round(x,.318,z,.151,.25,.132,10,red);
+ round(x,.545,z,.115,.17,.105,10,skin);
+ round(x,.595,z,.117,.052,.119,10,["#3c3530","#2b2d28","#252622"]);
+ round(x,.661,z,.133,.107,.098,10,["#ffffef","#e8e7db","#c3c9bb"]);
+ box(x+dx*.105-.064,.656,z+dz*.105-.063,.128,.028,.126,["#f7f6dc","#d6d8c4","#aab5a6"]);
+}
+function render(){
+ const dpr=Math.min(2,window.devicePixelRatio||1), w=canvas.clientWidth,h=canvas.clientHeight;
+ if(!w||!h)return;
+ if(w!==width||h!==height||canvas.width!==Math.round(w*dpr)){
+  width=w;height=h;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+ }
+ ctx.setTransform(dpr,0,0,dpr,0,0);
+ scale=Math.min(width/6.4,height/4.7);centerX=width*.53;centerY=height*.52;
+ ctx.fillStyle="#c2dda5";ctx.fillRect(0,0,width,height);
+ poly([[-.7,0,-.55],[3.75,0,-.55],[3.75,0,3.6],[-.7,0,3.6]].map(project),"#dbd7cc");
+ for(let z=0;z<4;z++)for(let x=0;x<4;x++){
+  poly([[x-.49,.004,z-.49],[x+.49,.004,z-.49],[x+.49,.004,z+.49],[x-.49,.004,z+.49]].map(project),(x+z)%2?"#c7c4be":"#cfccc5");
+ }
+ poly([[.38,0,3.5],[1.58,0,3.5],[1.58,0,5.4],[.38,0,5.4]].map(project),"#c9c7bf");
+ forest.forEach(([x,z,s])=>flat(x+.22,z+.23,.43*s,.32*s,"#9bb884"));
+ flat(visual[0]+.1,visual[1]+.08,.24,.16,"#9b9b91");
+ const [mx,mz]=target().point??[-10,-10];
+ if(target().point)flat(mx,mz,.36,.26,"#f5df9b");
+ faces.length=0;
+ forest.forEach(t=>tree(...t));
+ const brick=["#d9c5a7","#c6a78a","#ad8873"];
+ const trim=["#faf1dc","#decab0","#bda890"];
+ const glass=["#bedde6","#7399ac","#56778e"];
+ box(-.8,0,-1.83,4.75,1.58,1.25,brick);
+ box(-.9,1.56,-1.9,4.93,.13,1.39,trim);
+ box(-.84,0,-.62,4.82,.19,.08,trim);
+ for(const x of [-.48,.33,2.35,3.16]){
+   box(x,.64,-.6,.59,.59,.09,trim);
+   box(x+.055,.70,-.507,.48,.46,.022,glass);
+   box(x+.28,.70,-.483,.035,.46,.018,trim);
+ }
+ box(1.16,0,-.59,.86,.96,.1,trim);
+ box(1.23,.075,-.485,.72,.82,.043,glass);
+ box(1.56,.075,-.44,.036,.82,.019,trim);
+ box(1.00,0,-.51,1.18,.075,.36,trim);
+ box(1.23,1.13,-.57,.72,.21,.055,["#4d7892","#385f77","#2e536a"]);
+ for(const z of [.75,2.0]){
+   const x=3.92;
+   box(x,0,z,.22,.23,.11,colors.wood);
+   box(x,0,z+.58,.22,.23,.11,colors.wood);
+   box(x,.22,z,.30,.065,.7,colors.wood);
+   box(x+.26,.30,z,.06,.22,.7,colors.wood);
+ }
+ const offset=visual[0]===mx&&visual[1]===mz?.23:0;
+ if(target().point)character(mx+offset,mz+.14,true);
+ character(...visual);
+ faces.sort((a,b)=>a.distance-b.distance).forEach(f=>poly(f.vertices.map(project),f.color));
+ const sign=project([1.59,1.24,-.51]);
+ ctx.font="700 "+Math.max(10,scale*.122)+"px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff9ef";ctx.fillText("ШКОЛА",sign[0],sign[1]);
+ if(!target().point)return;
+ marker=project([mx,1.04,mz]);
+ const text=target().place;
+ ctx.font="700 14px system-ui";const tw=ctx.measureText(text).width+28;
+ ctx.fillStyle="#285d42";ctx.beginPath();ctx.roundRect(marker[0]-tw/2,marker[1]-14,tw,28,12);ctx.fill();
+ ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fffdf0";ctx.fillText(text,marker[0],marker[1]+1);
+}
+function adjacent(){if(!target().point)return true;const [x,z]=target().point;return Math.abs(player[0]-x)+Math.abs(player[1]-z)<=1;}
+function updateButton(){
+ $("interact").disabled=moving||route.length>0;
+ $("interact").textContent=!target().point?"Разобрать показания · E":adjacent()?(missions[index].witnesses?"Поговорить · E":"Открыть ситуацию · E"):"Подойти к "+(missions[index].witnesses?target().place:"метке");
+}
+function load(i){
+ index=i;witnessCount=0;player=[0,3];visual=[...player];route=[];moving=false;facing=[0,-1];
+ $("mission").textContent=(i+1)+". "+missions[i].title;
+ $("objective").textContent=missions[i].goal;
+ $("story").textContent=story(i)+" · "+mode(i);
+ $("status").textContent=completed.has(i)?"Эпизод пройден":"";
+ updateProgress();
+ updateButton();render();
+}
+function step(dx,dz){
+ const x=player[0]+dx,z=player[1]+dz;
+ if(x<0||x>3||z<0||z>3)return;
+ facing=[dx,dz];player=[x,z];moving=true;updateButton();
+}
+function approach(){
+ if(moving||route.length)return;
+ if(adjacent()){openScenario();return;}
+ const [x,z]=target().point;
+ let [a,b]=player;
+ while(Math.abs(x-a)+Math.abs(z-b)>1){
+  const dx=Math.sign(x-a),dz=dx?0:Math.sign(z-b);
+  route.push([dx,dz]);a+=dx;b+=dz;
+ }
+ step(...route.shift());
+}
+function animate(time){
+ const delta=Math.min(40,time-last||16);last=time;
+ if(moving){
+   const distance=Math.hypot(player[0]-visual[0],player[1]-visual[1]), amount=delta*.008;
+   if(distance<=amount){
+     visual=[...player];moving=false;
+     if(route.length)step(...route.shift());
+     else updateButton();
+   }else visual=visual.map((v,i)=>v+(player[i]-v)*amount/distance);
+   render();
+ }
+ requestAnimationFrame(animate);
+}
+function updateProgress(){
+ $("progress").textContent=completed.size+" / "+missions.length+" уровней";
+}
+function drawMap(){
+ const grid=$("mapGrid");grid.replaceChildren();
+ for(const [title,top] of [["После звонка",22],["Школьное медиа",160],["Игровой чат",299],["Расследование во дворе",438]]){
+  const label=document.createElement("strong");label.className="branch";label.textContent=title;label.style.top=top+"px";grid.append(label);
+ }
+ treeNodes.forEach(([x,y,parent],i)=>{
+  if(parent<0)return;
+  const [px,py]=treeNodes[parent], dx=x-px,dy=y-py;
+  const line=document.createElement("div");line.className="map-line"+(completed.has(i)?" done":"");
+  Object.assign(line.style,{left:px+"px",top:y-dy+"px",width:Math.hypot(dx,dy)+"px",transform:"rotate("+Math.atan2(dy,dx)+"rad)"});
+  grid.append(line);
+ });
+ treeNodes.forEach(([x,y,parent],i)=>{
+  const node=document.createElement("div");node.className="node";node.style.left=x+"px";node.style.top=y-29+"px";
+  const button=document.createElement("button");button.disabled=!unlocked(i);
+  const label=document.createElement("strong"), format=document.createElement("small");
+  label.textContent=missions[i].title;format.textContent=mode(i);
+  button.textContent=completed.has(i)?"✓":button.disabled?"🔒":missions[i].mode==="inspect"?"⌕":missions[i].mode==="order"?"≡":"◆";
+  button.setAttribute("aria-label",missions[i].title+(button.disabled?". Сначала пройди «"+missions[parent].title+"»":""));
+  if(i===index)button.setAttribute("aria-current","step");
+  button.className=completed.has(i)?"passed":button.disabled?"":"available";
+  button.onclick=()=>{$("map").close();load(i);};node.append(button,label,format);grid.append(node);
+ });
+}
+function openMap(){drawMap();$("map").showModal();}
+$("showMap").onclick=openMap;
+$("scenarioMap").onclick=()=>{$("dialog").close();openMap();};
+$("closeMap").onclick=()=>$("map").close();
+function openWitness(dialog){
+ const witness=target();
+ $("scenarioTitle").textContent=witness.place;
+ $("scenario").textContent=witness.note;
+ $("choices").replaceChildren();$("feedback").textContent="";
+ $("advance").textContent="Записать показание";$("advance").hidden=false;
+ $("advance").onclick=()=>{
+  witnessCount++;dialog.close();
+  const next=target().place;
+  $("objective").textContent=next?"Показания: "+witnessCount+"/3. Следующий свидетель: "+next+".":"Показания: 3/3. Открой разбор и отдели подтверждённые сведения от слухов.";
+  updateButton();render();
+ };
+ dialog.showModal();
+}
+function sortEvidence(mission,finish){
+ const area=$("choices"), assigned=Array(mission.cards.length).fill(null);
+ const notes=document.createElement("details"), summary=document.createElement("summary");
+ summary.textContent="Перечитать показания";notes.append(summary);
+ for(const {place,note} of mission.witnesses){
+  const item=document.createElement("p");item.textContent=place+": "+note;notes.append(item);
+ }
+ const pending=document.createElement("div"), columns=document.createElement("div");
+ pending.className="evidence-list";columns.className="evidence-columns";
+ const labels=["Что известно","Что пока только слух"];
+ const bins=labels.map(label=>{
+  const bin=document.createElement("section"), heading=document.createElement("h3"), list=document.createElement("div");
+  heading.textContent=label;list.className="evidence-list";bin.append(heading,list);columns.append(bin);return list;
+ });
+ const check=document.createElement("button");check.className="primary";check.textContent="Проверить выводы";
+ check.onclick=()=>{
+  const mistakes=mission.cards.filter(([,known],i)=>assigned[i]!==Number(!known)).length;
+  finish(mistakes===0,mistakes?"Проверь показания ещё раз. Утверждений не в своей колонке: "+mistakes+".":"Ответ Арсена касался окончания спора. По показаниям нельзя установить, кто управлял другим аккаунтом. Сообщи взрослому о самом призыве к насилию и покажи полный контекст без публичных обвинений.");
+ };
+ function drawCards(){
+  pending.replaceChildren();bins.forEach(bin=>bin.replaceChildren());
+  mission.cards.forEach(([claim],i)=>{
+   const card=document.createElement("article"), text=document.createElement("p"), actions=document.createElement("div");
+   text.textContent=claim;actions.className="evidence-actions";
+   labels.forEach((label,column)=>{
+    const button=document.createElement("button");button.textContent=label;
+    button.setAttribute("aria-pressed",String(assigned[i]===column));
+    button.onclick=()=>{assigned[i]=column;drawCards();cards[i][column].focus();};
+    actions.append(button);
+   });
+   cards[i]=[...actions.children];
+   card.append(text,actions);(assigned[i]===null?pending:bins[assigned[i]]).append(card);
+  });
+  check.disabled=assigned.includes(null);
+ }
+ const cards=[];
+ area.replaceChildren(notes,pending,columns,check);
+ drawCards();
+}
+function openScenario(){
+ const dialog=$("dialog"), mission=missions[index];
+ if(dialog.open||$("map").open||moving||!adjacent())return;
+ if(mission.witnesses&&witnessCount<mission.witnesses.length){openWitness(dialog);return;}
+ correct=false;$("scenarioTitle").textContent=mission.title;
+ $("scenario").textContent=mission.witnesses?"Сверь показания и распредели утверждения между двумя колонками.":mission.scenario+(mission.question?" "+mission.question:"");
+ $("feedback").textContent="";$("advance").hidden=true;
+ const chosen=[];
+ const next=treeNodes.findIndex(([,y,parent])=>parent===index&&y===treeNodes[index][1]);
+ function finish(safe,feedback){
+   if(correct)return;
+   $("feedback").textContent=(safe?"Верный выбор. ":"Попробуй ещё раз. ")+feedback+(safe&&index===3?" Эльмира эже выслушала вас и передала сообщение администрации. Тимур вышел из группы и договорился поговорить со школьным психологом.":"");
+   if(!safe)return;
+   correct=true;completed.add(index);
+   try{localStorage.setItem(storageKey,JSON.stringify([...completed]));}catch{}
+   updateProgress();
+   $("status").textContent=completed.size===missions.length?"Все уровни пройдены":"Эпизод пройден";
+   $("choices").querySelectorAll("button").forEach(choice=>choice.disabled=true);
+   $("advance").textContent=next<0?"К карте уровней":"Следующая миссия";
+   $("advance").onclick=()=>{dialog.close();if(next<0)openMap();else load(next);};
+   $("advance").hidden=false;$("advance").focus();
+ }
+ if(mission.witnesses){sortEvidence(mission,finish);dialog.showModal();return;}
+ const buttons=mission.options.map(([label,feedback,safe],i)=>{
+  const button=document.createElement("button");button.textContent=label;
+  if(mission.mode)button.setAttribute("aria-pressed","false");
+  button.onclick=()=>{
+   if(!mission.mode){finish(safe,feedback);return;}
+   const at=chosen.indexOf(i);
+   if(at<0)chosen.push(i);else chosen.splice(at,1);
+   buttons.forEach((item,n)=>{
+    const order=chosen.indexOf(n);
+    item.setAttribute("aria-pressed",String(order>=0));
+    item.textContent=(mission.mode==="order"&&order>=0?(order+1)+". ":"")+mission.options[n][0];
+   });
+  };
+  return button;
+ });
+ $("choices").replaceChildren(...buttons);
+ if(mission.mode){
+  const check=document.createElement("button");check.textContent="Проверить";check.className="primary";
+  check.onclick=()=>{
+   const safe=mission.mode==="inspect"?chosen.length===2&&chosen.every(i=>mission.options[i][2]):chosen.length===buttons.length&&chosen.every((i,n)=>mission.options[i][2]===n+1);
+   finish(safe,safe?mission.result:mission.mode==="inspect"?"Отметь два способа проверить исходную публикацию.":"Проверь, в каком порядке Бек прекращает разговор, жалуется и блокирует контакт.");
+  };
+  $("choices").append(check);
+ }
+ dialog.showModal();
+}
+$("close").onclick=()=>$("dialog").close();
+$("interact").onclick=approach;
+document.querySelectorAll("[data-dir]").forEach(b=>b.onclick=()=>{if(!moving&&!route.length)step(...b.dataset.dir.split(",").map(Number));});
+canvas.addEventListener("click",event=>{
+ if(!target().point)return;
+ const rect=canvas.getBoundingClientRect();
+ if(Math.abs(event.clientX-rect.left-marker[0])<82&&Math.abs(event.clientY-rect.top-marker[1])<41)approach();
+});
+const keys={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],KeyW:[0,-1],KeyS:[0,1],KeyA:[-1,0],KeyD:[1,0]};
+document.addEventListener("keydown",event=>{
+ if($("dialog").open||$("map").open||event.altKey||event.ctrlKey||event.metaKey)return;
+ if(keys[event.code]){event.preventDefault();if(!moving&&!route.length)step(...keys[event.code]);}
+ if(event.code==="KeyE"&&!event.repeat)approach();
+});
+window.addEventListener("resize",render);
+load(index);requestAnimationFrame(animate);
+</script>
+</html>
