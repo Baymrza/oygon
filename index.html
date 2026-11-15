@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=18">
-<link rel="stylesheet" href="theme.css?v=18">
+<link rel="stylesheet" href="style.css?v=24">
+<link rel="stylesheet" href="theme.css?v=24">
 <script>try{var t=JSON.parse(localStorage.getItem('ob_theme'));if(t==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
 </head>
 <body>
@@ -84,7 +84,7 @@
     </div>
     <div class="foot-col">
       <h4>Разделы</h4>
-      <a href="#/home">Главная</a><a href="#/events">Афиша</a><a href="#/quest">Квест</a><a href="#/check">Проверка</a>
+      <a href="#/home">Главная</a><a href="#/events">Афиша</a><a href="#/quest">Квест</a><a href="#/facts">Цифры и замеры</a><a href="#/psychologists">Психологи</a><a href="#/pilot">Пробное занятие</a><a href="#/check">Проверка</a>
     </div>
     <div class="foot-col">
       <h4>Платформа</h4>
@@ -101,16 +101,32 @@
   </div>
 </footer>
 
+<div class="bot" id="bot">
+  <div class="bot-bubble" id="bot-bubble" role="dialog" aria-label="Психологи Ойгона">
+    <button class="bot-x" id="bot-x" aria-label="Закрыть подсказку">×</button>
+    <div class="bot-title"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" fill="currentColor"/></svg><span>Психологи Ойгона</span></div>
+    <div class="bot-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="bot-msg"><p>Привет! Здесь начинающие психологи, которым важна практика. Хочешь узнать, кто они?</p><a class="bot-cta" href="#/psychologists">Открыть список</a></div>
+  </div>
+  <a class="bot-btn" id="bot-btn" href="#/psychologists" aria-label="Психологи">
+    <span class="bot-ring" aria-hidden="true"></span><span class="bot-ring r2" aria-hidden="true"></span>
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="4" y="7" width="16" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7V4M9.5 4h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="9" cy="13" r="1.4" fill="currentColor"/><circle cx="15" cy="13" r="1.4" fill="currentColor"/><path d="M10 16.2c1.2.7 2.8.7 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+  </a>
+</div>
+
 <nav class="dock" id="dock" aria-label="Разделы"></nav>
 
 <dialog id="modal"><div class="modal-in"><button class="x" data-act="close" aria-label="Закрыть">×</button><div id="modal-body"></div></div></dialog>
 
-<script src="data.js?v=18"></script>
-<script src="i18n-ky.js?v=18"></script>
-<script src="i18n-ky2.js?v=18"></script>
-<script src="i18n.js?v=18"></script>
-<script src="banner.js?v=18"></script>
-<script src="game.js?v=18"></script>
-<script src="app.js?v=18"></script>
+<script src="data.js?v=24"></script>
+<script src="i18n-ky.js?v=24"></script>
+<script src="i18n-ky2.js?v=24"></script>
+<script src="i18n-ky3.js?v=24"></script>
+<script src="i18n-ky4.js?v=24"></script>
+<script src="i18n-ky5.js?v=24"></script>
+<script src="i18n.js?v=24"></script>
+<script src="banner.js?v=24"></script>
+<script src="game.js?v=24"></script>
+<script src="app.js?v=24"></script>
 </body>
 </html>

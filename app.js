@@ -35,8 +35,10 @@
   };
   const TABS = ['home', 'events', 'quest', 'trainer', 'check', 'support', 'report'];
   function buildDock() {
-    $('#dock').innerHTML = TABS.map(id =>
-      `<a href="#/${id}" data-tab="${id}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[id]}"/></svg><span>${t(id)}</span></a>`).join('');
+    // «Афиша» стоит по центру и выделена крупной тёмной кнопкой
+    const DOCK = ['home', 'quest', 'trainer', 'events', 'check', 'support', 'report'];
+    $('#dock').innerHTML = DOCK.map(id =>
+      `<a href="#/${id}" data-tab="${id}" ${id === 'events' ? 'class="center"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[id]}"/></svg><span>${t(id)}</span></a>`).join('');
   }
 
   /* ---------- хранилище демо-данных ---------- */
@@ -90,7 +92,8 @@
           <span class="eyebrow">Цифровой иммунитет молодёжи</span>
           <h1>Знающий человек <em>сам останавливает</em> манипулятора</h1>
           <p>Квест, тренажёр и разборы реальных историй. Без регистрации, без сбора данных.</p>
-          <div class="row"><a class="btn" href="#/quest">Пройти квест <span aria-hidden="true">→</span></a><a class="btn ghost" href="#/trainer">Тренажёр</a></div>
+          <div class="row"><button class="btn xl" data-act="home-chat">Начать «Закрытый чат» <span aria-hidden="true">→</span></button><a class="btn ghost" href="#/trainer">Тренажёр</a></div>
+          <span class="hero-note">4 минуты · без регистрации · разбор в конце</span>
           <div class="hero2-stats">
             <div class="stat"><b>${best ? imm + '%' : '—'}</b><span>твой иммунитет (лучший раунд)</span><div class="meter" style="margin-top:8px"><i style="width:${imm}%"></i></div></div>
             <div class="stat"><b>${game ? game.immun + '%' : quest ? quest.good + '/' + QUEST_MAX : '—'}</b><span>${game ? 'иммунитет в игре «Путь пяти городов»' : 'верных решений в квесте'}</span></div>
@@ -100,6 +103,7 @@
       </section>
       <div class="orn-divider" aria-hidden="true"><svg viewBox="0 0 64 32"><use href="#horn"/></svg></div>
       <section class="trio" aria-label="Игры и истории">${tiles}</section>
+      ${factsStrip()}
       <div class="cols">
         <section>
           <h2 class="sec hd">Главное<a href="#/news">Все новости <span aria-hidden="true">→</span></a></h2>
@@ -140,6 +144,7 @@
     (D.realStories || []).forEach(s => { if (hit(s.title, s.text.join(' '), s.note)) res.push(['Реальная история', s.title, s.text[0], 'data-href="#/check"']); });
     D.stories.forEach(s => { if (hit(s.title, s.contact, s.hook, s.tag)) res.push(['Учебная история', s.title, s.contact, 'data-href="#/check"']); });
     D.checklist.forEach(c => { if (hit(c.q, c.a)) res.push(['Медиаграмотность', c.q, c.a, 'data-href="#/check"']); });
+    D.facts.key.forEach(f => { if (hit(f.label, f.note, f.period, f.n)) res.push(['Цифры', f.n + ' ' + tr(f.unit) + ' ' + tr(f.label), tr(f.period) + '. ' + tr(f.note), 'data-href="#/facts"']); });
     return `<div class="page"><div class="page-head"><h1>Результаты поиска</h1><p>${q ? '«' + esc(qs.get('q')) + '»' : 'Введи запрос в строке поиска.'}</p></div>
       ${q ? `<p class="notice" style="text-align:left">Найдено: ${res.length}</p>` : ''}
       <div class="ev-list">${res.map(([k, t, d, at]) => `<article class="card post" ${at} role="button" tabindex="0" style="cursor:pointer"><span class="eyebrow">${k}</span><h3>${esc(tr(t))}</h3><p>${esc(tr(d).slice(0, 180))}…</p></article>`).join('')}</div>
@@ -183,6 +188,7 @@
       <article class="card rim game-card"><div class="gc-img" style="background-image:url(assets/t-karakol.jpg)"><span class="badge">Новая игра</span></div>
         <div class="post"><h3>Дозор</h3><p>Изометрическая игра: помоги школьникам остановить вербовку и проверить слухи. 9 уровней.</p>
         <div class="row"><a class="btn" href="#/dozor">Играть</a><span class="badge">9 уровней</span></div></div></article>
+      <article class="card post"><h3>Пробное занятие</h3><p>Одно похожее задание до квеста и одно после: так видно, стал ли ты лучше замечать давление.</p><div class="row"><a class="btn ghost" href="#/pilot">Открыть</a></div></article>
       <article class="card post"><h3>Быстрый квест «${esc(D.quest.title)}»</h3><p>6 ситуаций в одной переписке. Около 4 минут.</p>
         <div class="row"><button class="btn ghost" data-act="q-start">Начать</button></div></article>
     </div>`;
@@ -339,24 +345,152 @@
     <div class="page-head"><span class="eyebrow">Поддержка</span><h1>Ты не один</h1><p>Если тебе тревожно, страшно или ты не знаешь, что делать, можно поговорить.</p></div>
     <div class="card rim post"><h3>Если опасно прямо сейчас</h3>
       <div class="hot"><b>112</b><span>Единый номер экстренных служб</span></div>
-      <div class="hot"><b>111</b><span>Телефон доверия для детей и подростков</span></div>
-      <p class="notice" style="text-align:left;padding:0">Номера и режим работы перед запуском проверяет команда и партнёры.</p></div>
-    <div class="card post"><h3>Написать психологу-наставнику</h3>
-      <p>Раздел в пилоте: отвечают начинающие психологи под наставничеством. Кризисные случаи передаются дипломированным специалистам и на горячую линию.</p>
-      ${supportSent ? '<div class="safe">Сообщение сохранено в демо. В рабочей версии оно уйдёт психологу.</div>' : `<form data-form="support"><div class="field"><label for="st">О чём хочешь поговорить?</label><textarea id="st" required maxlength="800" placeholder="Можно без имён и подробностей"></textarea></div><div class="row"><button class="btn" type="submit">Отправить</button></div></form>`}</div>
-    <div class="card post"><h3>Когда мы сразу передаём дальше</h3><ul class="clean"><li>Есть угроза жизни или здоровью: себе или другим.</li><li>Человека шантажируют или принуждают.</li><li>Есть признаки насилия или вовлечения в незаконное.</li><li>Человек просит о срочной помощи.</li></ul></div>
+      <div class="hot"><b>111</b><span>Телефон доверия для детей и подростков · круглосуточно, бесплатно</span></div>
+      <p class="notice" style="text-align:left;padding:0">Проверено по открытым источникам: <a target="_blank" rel="noopener" href="https://kaktus.media/doc/440383_naydite_psihologa_vzlomali_akkaynt._komy_pomogli_sotrydniki_telefona_doveriia_111.html">Kaktus.media</a>, <a target="_blank" rel="noopener" href="https://kyrgyzstan.un.org/en/35934-112-service-operator-%E2%80%9C-my-first-work-day-i-felt-uncertainty-fear-and-worry-about-my-family">ООН в Кыргызстане</a>. Перед запуском номера подтверждают партнёры.</p></div>
+    <div class="card post"><h3>Психологи-новички</h3>
+      <p>Скоро здесь появятся выпускники вузов, которые набираются опыта под наставничеством. Сейчас в разделе демонстрационный список, а чата и ответов на сообщения пока нет.</p>
+      <div class="row"><a class="btn" href="#/psychologists">Открыть список психологов</a></div></div>
+    <div class="card post"><h3>Когда нужно сразу обратиться за помощью</h3><ul class="clean"><li>Есть угроза жизни или здоровью: себе или другим.</li><li>Человека шантажируют или принуждают.</li><li>Есть признаки насилия или вовлечения в незаконное.</li><li>Человек просит о срочной помощи.</li></ul></div>
   </div>`;
 
-  // Сообщить
-  V.report = () => reportSent ? `<div class="page"><div class="card rim hero"><span class="eyebrow">Обращение отправлено</span><h1>Спасибо, что рассказал</h1><p>Номер обращения: <b>#${reportSent}</b>. Его увидит оператор. Мы не требуем имени и не собираем данные о тебе.</p><div class="row"><button class="btn" data-act="r-again">Ещё одно</button><a class="btn ghost" href="#/support">Нужна поддержка?</a></div></div></div>` : `<div class="page">
-    <div class="page-head"><span class="eyebrow">Сообщить</span><h1>Расскажи, что произошло</h1><p>Обращение уходит только если ты сам нажмёшь «Отправить». Это добровольно, без слежки. Мы не оцениваем тебя.</p></div>
+  // Сообщить (демо: запись остаётся в браузере и оператору не уходит)
+  V.report = () => reportSent ? `<div class="page"><div class="card rim hero"><span class="eyebrow">Сохранено в демо</span><h1>Спасибо, что попробовал</h1><p>Номер демо-записи: <b>#${reportSent}</b>. Запись осталась только в этом браузере, оператору она не передана. Мы не собираем данные о тебе.</p><div class="row"><button class="btn" data-act="r-again">Ещё одно</button><a class="btn ghost" href="#/support">Нужна поддержка?</a></div></div></div>` : `<div class="page">
+    <div class="demo-box" role="note"><b>Это демонстрация</b><p>Форма показана на вымышленном примере. Ничего не отправляется: запись сохранится только в этом браузере, и оператор её не увидит. В рабочей версии обращение будет уходить оператору, только если ты сам нажмёшь «Отправить».</p></div>
+    <div class="page-head"><span class="eyebrow">Сообщить</span><h1>Расскажи, что произошло</h1><p>Так будет выглядеть обращение. Данные никому не передаются. Это добровольно, без слежки, и мы не оцениваем тебя.</p></div>
     <form class="card post" data-form="report">
+      <div class="row"><button class="btn ghost sm" type="button" data-act="r-example">Заполнить вымышленным примером</button></div>
       <div class="field"><label for="rc">Что случилось?</label><select id="rc" required>${CATS.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></div>
       <div class="field"><label for="rt">Опиши ситуацию</label><textarea id="rt" required minlength="10" maxlength="1500" placeholder="Что написали, как познакомились, что просят"></textarea></div>
       <div class="field"><label for="rl">Ссылка на профиль или сообщение (по желанию)</label><input id="rl" type="url" placeholder="https://"></div>
       <div class="alert">Не указывай свой пароль, номера карт и коды из СМС.</div>
-      <div class="row"><button class="btn" type="submit">Отправить</button></div>
+      <div class="row"><button class="btn" type="submit">Сохранить в демо</button></div>
     </form></div>`;
+
+  /* ---------- Цифры и замеры ---------- */
+  const fmt = n => Number(n).toLocaleString('ru-RU');
+  const srcLine = (s, d) => `<span class="f-src">${esc(s)} · ${esc(d)}</span>`;
+  const bar = (l, v, max, cls) => `<div class="brow"><span class="bl">${esc(l)}</span><div class="btrack"><i class="${cls}" style="width:${Math.max(3, v / max * 100)}%"></i></div><b>${fmt(v)}</b></div>`;
+  const statTile = (f, link) => `<${link ? 'a href="#/facts"' : 'article'} class="fstat"><b class="fn">${esc(f.n)}${f.unit ? ` <small>${esc(f.unit)}</small>` : ''}</b><span class="fl">${esc(f.label)}</span><span class="fp">${esc(f.period)}</span></${link ? 'a' : 'article'}>`;
+  V.facts = () => {
+    const F = D.facts, best = LS.get('ob_best', null), game = LS.get('ob_game', null), P = LS.get('ob_pilot', {});
+    const pv = r => r ? `<span>Признаков найдено: ${r.hits} из 4</span> · <span>${r.safe ? 'Безопасный ответ: да' : 'Безопасный ответ: нет'}</span>` : '—';
+    const nav = [['f-scale', 'Масштаб проблемы'], ['f-years', 'Шкала по годам'], ['f-help', 'Помощь и обращения'], ['f-result', 'Результаты проекта']];
+    return `<div class="page wide facts">
+      <div class="page-head"><span class="eyebrow">Цифры и замеры</span><h1>Масштаб проблемы и результаты проекта</h1><p>Что известно о мошенничестве и обращениях за помощью в Кыргызстане и как мы будем измерять результат. У каждой цифры есть период, источник и дата.</p></div>
+      <div class="chips f-nav">${nav.map(([id, n]) => `<button class="chip" data-act="scrollto" data-t="${id}">${n}</button>`).join('')}</div>
+
+      <section id="f-scale"><h2 class="sec hd">Масштаб проблемы</h2>
+        <div class="fgrid">${F.key.map(f => `<article class="card fcard">${statTile(f, false)}<p class="fnote">${esc(f.note)}</p>${srcLine(f.src, f.date)}<a class="flink" target="_blank" rel="noopener" href="${esc(f.url)}">Открыть источник <span aria-hidden="true">↗</span></a></article>`).join('')}</div>
+      </section>
+
+      <section id="f-years"><h2 class="sec hd">Шкала по годам</h2>
+        <div class="fcmp">${F.compare.map(c => { const m = Math.max(c.a.v, c.b.v); return `<article class="card"><h3>${esc(c.title)}</h3><div class="bars">${bar(c.a.l, c.a.v, m, 'b1')}${bar(c.b.l, c.b.v, m, 'b2')}</div><p class="fnote"><b>${esc(c.note)}</b></p>${srcLine(c.src, c.date)}</article>`; }).join('')}</div>
+        <ol class="tline">${F.timeline.map(t => `<li><span class="ty">${t.year}</span><div class="card"><p>${esc(t.text)}</p>${srcLine(t.src, t.date)}</div></li>`).join('')}</ol>
+      </section>
+
+      <section id="f-help"><h2 class="sec hd">Помощь и обращения</h2>
+        <div class="card"><h3>Телефон доверия 111: январь–август 2026</h3><div class="fhelp">${F.help.map(h => `<div class="fh"><b>${esc(h.v)}</b><span>${esc(h.l)}</span></div>`).join('')}</div>
+        <p class="fnote">${esc(F.helpNote)}</p>${srcLine('Минсоцтруда КР, economist.kg', '10 сентября 2026')}</div>
+      </section>
+
+      <section id="f-result"><h2 class="sec hd">Результаты проекта</h2>
+        <div class="fgrid2">
+          <div class="card"><h3>Что мы измеряем</h3><ul class="clean">${F.metrics.map(m => `<li><b>${esc(m.t)}.</b> ${esc(m.d)}</li>`).join('')}</ul>
+            <p class="fnote">План замера: «Задание до квеста», квест «Закрытый чат», «Задание после квеста», сравнение результатов группы без имён.</p></div>
+          <div class="card rim"><h3>Результаты пилота</h3>
+            <div class="bars"><div class="brow"><span class="bl">До квеста</span><div class="btrack"></div><b>—</b></div><div class="brow"><span class="bl">После квеста</span><div class="btrack"></div><b>—</b></div></div>
+            <div class="alert">${esc(F.pilotStatus)}</div>
+            <a class="btn ghost sm" href="#/pilot">Пробное занятие</a></div>
+        </div>
+        <div class="card"><h3>Твои замеры на этом устройстве</h3>
+          <div class="fhelp">
+            <div class="fh"><b>${best ? best.pct + '%' : '—'}</b><span>Лучший раунд тренажёра</span></div>
+            <div class="fh"><b>${game ? game.immun + '%' : '—'}</b><span>Иммунитет в игре «Путь пяти городов»</span></div>
+            <div class="fh"><b class="fsm">${pv(P.pre)}</b><span>Задание до квеста</span></div>
+            <div class="fh"><b class="fsm">${pv(P.post)}</b><span>Задание после квеста</span></div>
+          </div><p class="fnote">Результаты хранятся только на этом устройстве и никуда не передаются.</p></div>
+      </section>
+
+      <section><h2 class="sec hd">Чего мы не нашли</h2>
+        <div class="card"><ul class="clean">${F.gaps.map(g => `<li>${esc(g)}</li>`).join('')}</ul><p class="fnote">${esc(F.howTo)}</p></div>
+      </section>
+    </div>`;
+  };
+  const factsStrip = () => `<section class="facts-strip" aria-label="Цифры и замеры">
+    <h2 class="sec hd">Цифры и замеры<a href="#/facts">Все цифры <span aria-hidden="true">→</span></a></h2>
+    <div class="fstrip">${D.facts.key.map(f => statTile(f, true)).join('')}</div></section>`;
+
+  /* ---------- Психологи-новички (демо-список) ---------- */
+  let psyTopic = 'Все';
+  const PSY_TOPICS = ['Все', 'Учёба и стресс', 'Давление в сети', 'Общение и одиночество', 'Семья'];
+  const psyCard = p => `<article class="card psy" data-act="psy" data-id="${p.id}" role="button" tabindex="0">
+    <div class="psy-top"><span class="psy-av" style="--h:${p.hue}">${esc(p.name[0])}</span><div><h3>${esc(p.name)}</h3><span class="psy-role">${esc(p.role)}</span></div><span class="badge warn">Демо-профиль</span></div>
+    <p>${esc(p.about)}</p>
+    <div class="tricks">${p.topics.map(t => `<span class="badge">${esc(t)}</span>`).join('')}</div>
+    <div class="psy-meta"><span>${esc(p.lang)}</span><span>Под наставничеством опытного психолога</span></div>
+    <span class="psy-more">Подробнее ${ARROW}</span></article>`;
+  V.psychologists = () => {
+    const list = D.psychs.filter(p => psyTopic === 'Все' || p.topics.includes(psyTopic));
+    return `<div class="page wide">
+      <div class="page-head"><span class="eyebrow">Психологи</span><h1>Психологи-новички</h1><p>Недавние выпускники вузов, которые хотят набраться опыта. Работают под наставничеством и не ведут кризисные случаи.</p></div>
+      <div class="demo-box" role="note"><b>Демо-список</b><p>Профили вымышленные, записи и чата пока нет. Так будет выглядеть раздел, когда мы договоримся с партнёрами. Если тебе тяжело сейчас, позвони на 111 или поговори со взрослым, которому доверяешь.</p></div>
+      <div class="chips">${PSY_TOPICS.map(c => `<button class="chip" data-act="psytopic" data-c="${esc(c)}" aria-pressed="${c === psyTopic}">${esc(c)}</button>`).join('')}</div>
+      <div class="psy-grid">${list.map(psyCard).join('')}</div>
+      <div class="card rim post"><h3>Ты психолог-новичок?</h3><p>Хочешь набраться опыта под наставничеством? Мы ищем выпускников психологии и студентов старших курсов для пилота.</p><div class="row"><button class="btn" data-act="psyjoin">Узнать условия</button></div></div>
+    </div>`;
+  };
+  function openPsy(id) {
+    const p = D.psychs.find(x => x.id === id); if (!p) return;
+    $('#modal-body').innerHTML = `<div class="psy-modal" style="display:grid;gap:12px">
+      <div class="psy-top"><span class="psy-av big" style="--h:${p.hue}">${esc(p.name[0])}</span><div><h2>${esc(p.name)}</h2><span class="psy-role">${esc(p.role)}</span></div></div>
+      <span class="badge warn" style="justify-self:start">Демо-профиль</span>
+      <p>${esc(p.about)}</p>
+      <div class="tricks">${p.topics.map(t => `<span class="badge">${esc(t)}</span>`).join('')}</div>
+      <ul class="clean"><li>Языки: ${esc(p.lang)}</li><li>Формат: онлайн-встреча (в планах)</li><li>Под наставничеством опытного психолога</li></ul>
+      <div class="alert">Записи пока нет: профиль демонстрационный. Новички не ведут кризисные случаи: при угрозе жизни звони на 112 или 111.</div></div>`;
+    const d = $('#modal'); if (!d.open) d.showModal();
+  }
+  function openPsyJoin() {
+    $('#modal-body').innerHTML = `<h2>Условия пилота для психологов</h2><ul class="clean"><li>Диплом или справка о прохождении практики.</li><li>Наставник: опытный психолог, который проверяет работу.</li><li>Новички не ведут кризисные случаи: при угрозе передают на 111 и дипломированным специалистам.</li><li>Никаких личных данных подростков в открытых чатах.</li></ul><p>Заявки пока не принимаются: контакты команды появятся перед пилотом.</p>`;
+    const d = $('#modal'); if (!d.open) d.showModal();
+  }
+
+  /* ---------- Пробное занятие: задание до и после квеста ---------- */
+  const PILOT = {
+    techs: ['flattery', 'us_them', 'threats', 'secrecy', 'isolation', 'urgency', 'guilt', 'docs', 'easy_glory'],
+    pre: { msg: 'Ты не такой, как остальные, я сразу это понял. Давай перейдём в закрытый чат, туда пускают только «своих». Никому не говори и реши сейчас, пока есть место.', right: ['flattery', 'us_them', 'secrecy', 'urgency'],
+      replies: [['Хорошо, скинь ссылку, я зайду', false], ['Спасибо, но в закрытые чаты к незнакомым не вхожу. Покажу переписку взрослому', true], ['Зайду, только пообещай, что это безопасно', false]] },
+    post: { msg: 'Ты один из немногих, кто всё понимает, не то что остальные. Группа открыта только до вечера. Родители тебя не поймут, им лучше не показывать.', right: ['flattery', 'us_them', 'urgency', 'isolation'],
+      replies: [['Ладно, зайду, пока не закрыли', false], ['Не буду. Покажу сообщение маме или учителю и заблокирую контакт', true], ['Скажу, что подумаю до вечера, и зайду посмотреть', false]] }
+  };
+  let PL = { sel: new Set(), reply: null, after: false };
+  const pScore = r => Math.max(0, r.hits - r.extra);
+  const pTask = key => {
+    const t = PILOT[key];
+    return `<div class="card post"><span class="eyebrow">${key === 'pre' ? 'Задание до квеста' : 'Задание после квеста'}</span>
+      <div class="chat"><div class="bubble">«${esc(t.msg)}»</div></div>
+      <h3>1. Какие приёмы давления ты видишь?</h3>
+      <div class="chips">${PILOT.techs.map(k => `<button class="chip" data-act="p-tech" data-k="${k}" aria-pressed="${PL.sel.has(k)}">${esc(D.tech[k].n)}</button>`).join('')}</div>
+      <h3>2. Как ответишь?</h3>
+      <div class="choices">${t.replies.map((r, i) => `<button class="choice ${PL.reply === i ? 'ok' : ''}" data-act="p-reply" data-k="${i}" aria-pressed="${PL.reply === i}">${esc(r[0])}</button>`).join('')}</div>
+      <div class="row"><button class="btn" data-act="p-submit" ${PL.reply == null ? 'disabled' : ''}>Сохранить ответ</button></div></div>`;
+  };
+  V.pilot = () => {
+    const P = LS.get('ob_pilot', {});
+    let body;
+    if (!P.pre) body = pTask('pre');
+    else if (!P.post && !PL.after) body = `<div class="card rim post"><h2>Задание до квеста сохранено</h2><p>Теперь пройди «Закрытый чат», а потом вернись за вторым заданием.</p><div class="row"><button class="btn" data-act="home-chat">Начать «Закрытый чат»</button><button class="btn ghost" data-act="p-after">Перейти к заданию после квеста</button></div></div>`;
+    else if (!P.post) body = pTask('post');
+    else {
+      const col = (title, r) => `<div class="card post"><h3>${title}</h3><div class="stat"><b>${r.hits}/4</b><span>Признаков найдено: ${r.hits} из 4</span></div><p>Лишних отметок: ${r.extra}</p><p>${r.safe ? 'Безопасный ответ: да' : 'Безопасный ответ: нет'}</p></div>`;
+      const d = (pScore(P.post) + (P.post.safe ? 1 : 0)) - (pScore(P.pre) + (P.pre.safe ? 1 : 0));
+      body = `<h2>Сравнение до и после</h2><div class="trio2">${col('До квеста', P.pre)}${col('После квеста', P.post)}</div>
+        <div class="card rim post"><p style="color:var(--ink)"><b>${d > 0 ? 'Ты стал лучше замечать признаки давления.' : d === 0 ? 'Результат не изменился. Пройди «Закрытый чат» ещё раз и сравни.' : 'Результат стал ниже. Перечитай разбор в квесте и попробуй снова.'}</b></p>
+        <div class="row"><button class="btn" data-act="home-chat">Начать «Закрытый чат»</button><button class="btn ghost" data-act="p-reset">Пройти заново</button></div></div>`;
+    }
+    return `<div class="page"><div class="page-head"><span class="eyebrow">Пилот</span><h1>Пробное занятие</h1><p>Одно и то же умение проверяем дважды: до квеста и после. Сообщения вымышленные.</p></div>${body}
+      <p class="notice" style="text-align:left">Результаты хранятся только на этом устройстве и никуда не передаются. На занятии учитель может собрать их без имён.</p></div>`;
+  };
 
   // Админ-панель
   V.admin = () => {
@@ -389,10 +523,10 @@
   /* ---------- инфо-окна ---------- */
   const INFO = {
     about: ['О проекте', '<p>«Ойгон» помогает школьникам и студентам распознавать манипуляцию и вербовку в сети. Мы не блокируем и не запрещаем, а вырабатываем иммунитет: учим узнавать приёмы давления на историях, в квесте и тренажёре.</p><p>Проект создан на хакатоне Digital Hackathon Osh. Название «Ойгон» — «пробудись, будь внимателен».</p>'],
-    rules: ['Правила платформы', '<ul class="clean"><li>Нейтральность: оцениваем приёмы манипуляции, а не убеждения и группы людей.</li><li>Приватность: без регистрации, без баз персональных данных.</li><li>Без комментариев и открытых дискуссий: только реакции.</li><li>Обращения уходят только если пользователь сам нажал «Отправить».</li><li>Публикуют только уполномоченные операторы, с модерацией.</li></ul>'],
+    rules: ['Правила платформы', '<ul class="clean"><li>Нейтральность: оцениваем приёмы манипуляции, а не убеждения и группы людей.</li><li>Приватность: без регистрации, без баз персональных данных.</li><li>Без комментариев и открытых дискуссий: только реакции.</li><li>В рабочей версии обращение уходит оператору только если пользователь сам нажал «Отправить». Сейчас форма работает в демо-режиме.</li><li>Публикуют только уполномоченные операторы, с модерацией.</li></ul>'],
     partners: ['Партнёры', '<p>Школы и вузы региона, правоохранительные органы, психологи и факультеты психологии. Здесь появятся логотипы партнёров пилота.</p>'],
-    teachers: ['Классный час «Цифровой иммунитет»', '<p>Приглашаем учителей и кураторов провести урок на 30–40 минут: класс проходит игру «Путь пяти городов», тренажёр и обсуждает разбор. Вход по QR-коду, регистрация и сбор данных не нужны.</p><ul class="clean"><li>Материалы для учителя: план урока и вопросы для обсуждения (скоро).</li><li>Подходит для 8–11 классов и студентов колледжей.</li><li>Хотите пилот в вашей школе? Напишите через вкладку «Сообщить» или оператору платформы.</li></ul><p><a href="#/quest" data-act="close">Открыть игру</a></p>'],
-    help: ['Помощь и контакты', '<p>Нужна поддержка — загляни во вкладку «Поддержка». Хочешь сообщить о случае — вкладка «Сообщить». Для школ и учителей: материалы для классного часа будут на сайте.</p><p><a href="#/admin" data-act="close">Вход для операторов</a></p>']
+    teachers: ['Классный час «Цифровой иммунитет»', '<p>Приглашаем учителей и кураторов провести урок на 30–40 минут: класс проходит игру «Путь пяти городов», тренажёр и обсуждает разбор. Вход по QR-коду, регистрация и сбор данных не нужны.</p><ul class="clean"><li>Материалы для учителя: план урока и вопросы для обсуждения (скоро).</li><li>Подходит для 8–11 классов и студентов колледжей.</li><li>Хотите пилот в вашей школе? Свяжитесь с командой проекта.</li></ul><p><a href="#/pilot" data-act="close">Пробное занятие с заданиями до и после</a></p>'],
+    help: ['Помощь и контакты', '<p>Нужна поддержка — загляни во вкладку «Поддержка». Хочешь попробовать форму обращения — вкладка «Сообщить» (демо). Для школ и учителей: материалы для классного часа будут на сайте.</p><p><a href="#/admin" data-act="close">Вход для операторов</a></p>']
   };
   function openInfo(k) {
     if (k === 'menu') {
@@ -409,7 +543,8 @@
     clearInterval(timerId);
     let r = route(); if (!V[r]) r = 'home';
     $('#view').innerHTML = V[r]();
-    const tab = ({ dozor: 'quest', news: 'home', search: '' })[r] ?? r;
+    document.body.classList.toggle('no-bot', r === 'dozor' || r === 'psychologists');
+    const tab = ({ dozor: 'quest', pilot: 'quest', psychologists: 'support', facts: 'home', news: 'home', search: '' })[r] ?? r;
     $$('#dock a, #mainnav a').forEach(x => { if (x.dataset.tab === tab) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current'); });
     if (V[r].mount) V[r].mount();
     if (!keepScroll) window.scrollTo({ top: 0 });
@@ -430,6 +565,10 @@
       case 'share': { const u = location.href.split('#')[0]; if (navigator.share) navigator.share({ title: 'Ойгон', url: u }).catch(() => {}); else navigator.clipboard && navigator.clipboard.writeText(u).then(() => { el.textContent = 'Ссылка скопирована'; }); break; }
       case 'evcat': evCat = el.dataset.c; render(true); break;
       case 'post': openPost(el.dataset.id); break;
+      case 'psy': openPsy(el.dataset.id); break;
+      case 'scrollto': { const t = document.getElementById(el.dataset.t); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
+      case 'psyjoin': openPsyJoin(); break;
+      case 'psytopic': psyTopic = el.dataset.c; render(true); break;
       case 'react-m': { const r = reacted(); r[el.dataset.id] = !r[el.dataset.id]; LS.set('ob_react', r); openPost(el.dataset.id); break; }
       case 'chk': checkTab = k; render(true); break;
       // квест
@@ -446,6 +585,17 @@
       case 't-next': if (TR.i === TR.items.length - 1) { TR.done = true; const pct = Math.round(TR.ok / TR.items.length * 100), b = LS.get('ob_best', null); if (!b || pct > b.pct || (pct === b.pct && TR.score > b.score)) LS.set('ob_best', { pct, score: TR.score }); } else { TR.i++; TR.last = null; } render(); break;
       case 't-share': { const pct = Math.round(TR.ok / TR.items.length * 100), txt = (window.I18N ? I18N.tr : String)(`Мой цифровой иммунитет в «Ойгон»: ${pct}%. А твой?`); if (navigator.share) navigator.share({ text: txt }).catch(() => {}); else navigator.clipboard && navigator.clipboard.writeText(txt).then(() => { el.textContent = 'Скопировано'; }); break; }
       case 'r-again': reportSent = null; render(); break;
+      case 'r-example': { const T2 = window.I18N ? I18N.tr : (x => x); $('#rc').value = 'Закрытый чат / вербовка'; $('#rt').value = T2('Пример (вымышленный): незнакомый человек написал мне в личку, хвалит и зовёт в закрытый чат, просит никому не говорить и ответить до вечера.'); break; }
+      case 'home-chat': { if (window.GAME && GAME.active()) GAME.handle('g-quit', null, () => {}); Q = { i: 0, good: 0, picked: null, picks: [], lead: '', done: false }; if (route() === 'quest') render(); else location.hash = '#/quest'; break; }
+      case 'p-tech': if (PL.sel.has(k)) PL.sel.delete(k); else PL.sel.add(k); render(true); break;
+      case 'p-reply': PL.reply = +k; render(true); break;
+      case 'p-after': PL = { sel: new Set(), reply: null, after: true }; render(); break;
+      case 'p-reset': try { localStorage.removeItem('ob_pilot'); } catch { } PL = { sel: new Set(), reply: null, after: false }; render(); break;
+      case 'p-submit': {
+        const P = LS.get('ob_pilot', {}), key = P.pre ? 'post' : 'pre', t = PILOT[key];
+        const hits = [...PL.sel].filter(x => t.right.includes(x)).length, extra = PL.sel.size - hits;
+        P[key] = { hits, extra, safe: !!t.replies[PL.reply][1] }; LS.set('ob_pilot', P);
+        PL = { sel: new Set(), reply: null, after: false }; render(); break; }
       // админка
       case 'atab': adminTab = k; render(true); break;
       case 'a-out': adminOK = false; render(); break;
@@ -465,7 +615,6 @@
       r.push({ id, cat: $('#rc').value, text: $('#rt').value.trim(), link: $('#rl').value.trim(), status: 'Новое', at: Date.now() });
       LS.set('ob_reports', r); reportSent = id; render();
     }
-    if (kind === 'support') { supportSent = true; render(true); }
     if (kind === 'login') { if ($('#ac').value === '1234') { adminOK = true; render(); } else $('#aerr').textContent = 'Неверный код.'; }
     if (kind === 'publish') {
       const type = $('#pk').value, title = $('#pt').value.trim(), text = $('#px').value.trim(), tag = $('#pm').value.trim(), extra = $('#pd').value.trim();
@@ -481,7 +630,16 @@
 
   function setToday() {
     const el = $('#today'); if (!el) return;
-    try { const d = new Date().toLocaleDateString(lang === 'ky' ? 'ky-KG' : 'ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); el.textContent = d.charAt(0).toUpperCase() + d.slice(1); } catch { el.textContent = new Date().toLocaleDateString(); }
+    try {
+      const n = new Date();
+      if (lang === 'ky') {
+        const W = ['Жекшемби', 'Дүйшөмбү', 'Шейшемби', 'Шаршемби', 'Бейшемби', 'Жума', 'Ишемби'];
+        const M = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+        el.textContent = `${W[n.getDay()]}, ${n.getDate()}-${M[n.getMonth()]} ${n.getFullYear()}-ж.`;
+      } else {
+        const d = n.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); el.textContent = d.charAt(0).toUpperCase() + d.slice(1);
+      }
+    } catch { el.textContent = new Date().toLocaleDateString(); }
   }
   function syncFrame() {
     const fr = $('.dozor-frame'); if (!fr) return;
@@ -490,6 +648,16 @@
       if (document.documentElement.getAttribute('data-theme') === 'dark') w.document.documentElement.setAttribute('data-theme', 'dark'); else w.document.documentElement.removeAttribute('data-theme');
     } catch { }
   }
+
+  /* плавающая кнопка «Психологи»: пузырь выезжает через пару секунд, его можно закрыть */
+  (function initBot() {
+    const box = $('#bot'), bubble = $('#bot-bubble'); if (!box || !bubble) return;
+    let closed = false; try { closed = sessionStorage.getItem('ob_bot') === '1'; } catch { }
+    setTimeout(() => { if (!closed) bubble.classList.add('show'); }, 3000);
+    $('#bot-x').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); bubble.classList.remove('show'); try { sessionStorage.setItem('ob_bot', '1'); } catch { } });
+    bubble.addEventListener('click', e => { if (e.target.closest('.bot-cta')) { bubble.classList.remove('show'); try { sessionStorage.setItem('ob_bot', '1'); } catch { } } });
+    $('#bot-btn').addEventListener('click', () => bubble.classList.remove('show'));
+  })();
 
   applyLang(); buildDock(); setToday(); render();
 })();
