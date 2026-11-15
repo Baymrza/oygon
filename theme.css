@@ -390,3 +390,10 @@ body.no-bot .bot{display:none}
 .af-promo p{color:#e6d9c8;margin-top:4px}
 .af-promo .btn{background:#fff;color:#8f1d24;box-shadow:none}
 .af-promo .btn:hover{background:#ffe9d2}
+
+/* верхнее меню: О проекте, Правила, Партнёры, Помощь */
+.topnav{display:flex;gap:2px;margin-left:8px}
+.topnav button{padding:9px 14px;border-radius:999px;font-size:14px;font-weight:600;color:var(--ink);opacity:.8;white-space:nowrap}
+.topnav button:hover{background:var(--soft);opacity:1;color:var(--red)}
+@media (max-width:1180px){.tagline{display:none}}
+@media (max-width:899px){.topnav{display:none}}
