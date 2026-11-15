@@ -397,3 +397,20 @@ body.no-bot .bot{display:none}
 .topnav button:hover{background:var(--soft);opacity:1;color:var(--red)}
 @media (max-width:1180px){.tagline{display:none}}
 @media (max-width:899px){.topnav{display:none}}
+
+/* миссия и разделы платформы на главной */
+.mission{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.mission .card{display:grid;gap:8px;align-content:start}
+.m-ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;color:#fff}
+.m-ic.m1{background:linear-gradient(135deg,#1f6f6a,#0b3b44)}
+.m-ic.m2{background:linear-gradient(135deg,#e9893a,#c8353b)}
+.m-ic.m3{background:linear-gradient(135deg,#8f1d24,#17140f)}
+.sections{display:grid;gap:4px}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stile{display:grid;gap:4px;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;transition:transform .2s,border-color .2s,box-shadow .2s}
+.stile b{font-family:var(--f-head);font-size:18px}
+.stile span{font-size:13px;color:var(--mute)}
+.stile:hover{transform:translateY(-3px);border-color:var(--red);box-shadow:var(--shadow)}
+.mlink{padding:14px 16px;border-radius:16px;background:var(--soft);text-decoration:none;color:var(--ink);font-weight:600}
+@media (max-width:900px){.mission{grid-template-columns:1fr}.sgrid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.sgrid{grid-template-columns:1fr}}

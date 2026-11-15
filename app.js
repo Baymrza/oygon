@@ -12,8 +12,8 @@
 
   /* ---------- i18n (интерфейс; контент пока на русском) ---------- */
   const T = {
-    ru: { about: 'О проекте', rules: 'Правила', partners: 'Партнёры', help: 'Помощь', home: 'Главная', events: 'Афиша', quest: 'Квест', trainer: 'Тренажёр', check: 'Проверка', support: 'Поддержка', report: 'Сообщить', tagline: 'Цифровой иммунитет молодёжи' },
-    ky: { about: 'Долбоор жөнүндө', rules: 'Эрежелер', partners: 'Өнөктөштөр', help: 'Жардам', home: 'Башкы', events: 'Афиша', quest: 'Квест', trainer: 'Машыгуу', check: 'Текшерүү', support: 'Колдоо', report: 'Кабарлоо', tagline: 'Жаштардын санариптик иммунитети' }
+    ru: { about: 'О проекте', rules: 'Правила', partners: 'Партнёры', help: 'Помощь', home: 'Главная', events: 'Афиша', quest: 'Квест', trainer: 'Тренажёр', check: 'Проверка', support: 'Поддержка', report: 'Сообщить', tagline: 'Цифровой иммунитет молодёжи', news: 'Новости' },
+    ky: { about: 'Долбоор жөнүндө', rules: 'Эрежелер', partners: 'Өнөктөштөр', help: 'Жардам', home: 'Башкы', events: 'Афиша', quest: 'Квест', trainer: 'Машыгуу', check: 'Текшерүү', support: 'Колдоо', report: 'Кабарлоо', tagline: 'Жаштардын санариптик иммунитети', news: 'Жаңылыктар' }
   };
   let lang = LS.get('ob_lang', 'ru');
   const t = k => (T[lang] && T[lang][k]) || T.ru[k] || k;
@@ -31,12 +31,13 @@
     trainer: 'M13 3L5 14h6l-1 7 8-11h-6z',
     check: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4',
     support: 'M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z',
-    report: 'M5 21V4M5 4h11l-2 4 2 4H5'
+    report: 'M5 21V4M5 4h11l-2 4 2 4H5',
+    news: 'M4 5h13v14H6a2 2 0 0 1-2-2V5zM17 8h3v9a2 2 0 0 1-2 2M7 9h7M7 12h7M7 15h4'
   };
   const TABS = ['home', 'events', 'quest', 'trainer', 'check', 'support', 'report'];
   function buildDock() {
     // «Афиша» стоит по центру и выделена крупной тёмной кнопкой
-    const DOCK = ['home', 'quest', 'trainer', 'events', 'check', 'support', 'report'];
+    const DOCK = ['home', 'quest', 'news', 'events', 'check', 'support', 'report'];
     $('#dock').innerHTML = DOCK.map(id =>
       `<a href="#/${id}" data-tab="${id}" ${id === 'events' ? 'class="center"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[id]}"/></svg><span>${t(id)}</span></a>`).join('');
   }
@@ -101,11 +102,20 @@
         </div>
         <div class="hero2-img" style="background-image:url(assets/t-akbuura.jpg)" role="img" aria-label=""></div>
       </section>
+      <section class="mission" aria-label="Главные идеи">
+        <article class="card"><span class="m-ic m1" aria-hidden="true">🛡</span><h3>Защищаем молодёжь от плохого</h3><p>Учим узнавать вербовку, манипуляцию и мошенничество на играх, квестах и разборах реальных историй.</p></article>
+        <article class="card"><span class="m-ic m2" aria-hidden="true">✦</span><h3>Даём путь к хорошему</h3><p>Афиша учёбы, конкурсов и хакатонов, новости, поддержка психологов и полезные игры.</p></article>
+        <article class="card"><span class="m-ic m3" aria-hidden="true">⚑</span><h3>Боремся с мошенниками, которые спонсируют экстремизм</h3><p>Проверка сообщений и ссылок, цифры и источники, понятные советы, что делать.</p></article>
+      </section>
       <section class="af-promo"><div class="af-shield" aria-hidden="true"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.6 12.2l2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="af-promo-t"><h2>Борьба с мошенниками, которые спонсируют экстремизм</h2><p>Проверь подозрительное сообщение или ссылку за 10 секунд.</p></div>
         <a class="btn xl" href="#/antifraud">Проверить сообщение <span aria-hidden="true">→</span></a></section>
       <div class="orn-divider" aria-hidden="true"><svg viewBox="0 0 64 32"><use href="#horn"/></svg></div>
       <section class="trio" aria-label="Игры и истории">${tiles}</section>
+      <section class="sections" aria-label="Разделы платформы">
+        <h2 class="sec hd">Что есть на платформе</h2>
+        <div class="sgrid">${[['#/news', 'Новости', 'Предупреждения о схемах, разборы и советы.'], ['#/quest', 'Квесты и игры', 'Закрытый чат, Путь пяти городов, Дозор, тренажёр.'], ['#/antifraud', 'Проверка мошенников', 'Проверь сообщение или ссылку за 10 секунд.'], ['#/events', 'Афиша', 'Учёба, конкурсы, хакатоны и события.'], ['#/psychologists', 'Психологи', 'Начинающие психологи под наставничеством.'], ['#/facts', 'Цифры и замеры', 'Масштаб проблемы и результаты проекта.']].map(([h, t, d]) => `<a class="stile" href="${h}"><b>${t}</b><span>${d}</span></a>`).join('')}</div>
+      </section>
       ${factsStrip()}
       <div class="cols">
         <section>
@@ -191,6 +201,7 @@
       <article class="card rim game-card"><div class="gc-img" style="background-image:url(assets/t-karakol.jpg)"><span class="badge">Новая игра</span></div>
         <div class="post"><h3>Дозор</h3><p>Изометрическая игра: помоги школьникам остановить вербовку и проверить слухи. 9 уровней.</p>
         <div class="row"><a class="btn" href="#/dozor">Играть</a><span class="badge">9 уровней</span></div></div></article>
+      <article class="card post"><h3>Тренажёр эмоционального иммунитета</h3><p>Быстрая игра: отметь приём давления в сообщении и набери баллы.</p><div class="row"><a class="btn ghost" href="#/trainer">Открыть</a></div></article>
       <article class="card post"><h3>Пробное занятие</h3><p>Одно похожее задание до квеста и одно после: так видно, стал ли ты лучше замечать давление.</p><div class="row"><a class="btn ghost" href="#/pilot">Открыть</a></div></article>
       <article class="card post"><h3>Быстрый квест «${esc(D.quest.title)}»</h3><p>6 ситуаций в одной переписке. Около 4 минут.</p>
         <div class="row"><button class="btn ghost" data-act="q-start">Начать</button></div></article>
@@ -568,7 +579,7 @@
 
   /* ---------- инфо-окна ---------- */
   const INFO = {
-    about: ['О проекте', '<p>«Ойгон» помогает школьникам и студентам распознавать манипуляцию и вербовку в сети. Мы не блокируем и не запрещаем, а вырабатываем иммунитет: учим узнавать приёмы давления на историях, в квесте и тренажёре.</p><p>Проект создан на хакатоне Digital Hackathon Osh. Название «Ойгон» — «пробудись, будь внимателен».</p>'],
+    about: ['О проекте', '<p>«Ойгон» помогает школьникам и студентам распознавать манипуляцию и вербовку в сети. Мы не блокируем и не запрещаем, а вырабатываем иммунитет: учим узнавать приёмы давления на историях, в квесте и тренажёре.</p><p>Платформа объединяет новости, квесты и игры, проверку мошенников и афишу. Главные идеи: защищать молодёжь от плохого, давать путь к хорошему и бороться с мошенниками, которые спонсируют экстремизм.</p><p>Проект создан на хакатоне Digital Hackathon Osh. Название «Ойгон» — «пробудись, будь внимателен».</p>'],
     rules: ['Правила платформы', '<ul class="clean"><li>Нейтральность: оцениваем приёмы манипуляции, а не убеждения и группы людей.</li><li>Приватность: без регистрации, без баз персональных данных.</li><li>Без комментариев и открытых дискуссий: только реакции.</li><li>В рабочей версии обращение уходит оператору только если пользователь сам нажал «Отправить». Сейчас форма работает в демо-режиме.</li><li>Публикуют только уполномоченные операторы, с модерацией.</li></ul>'],
     partners: ['Партнёры', '<p>Школы и вузы региона, правоохранительные органы, психологи и факультеты психологии. Здесь появятся логотипы партнёров пилота.</p>'],
     teachers: ['Классный час «Цифровой иммунитет»', '<p>Приглашаем учителей и кураторов провести урок на 30–40 минут: класс проходит игру «Путь пяти городов», тренажёр и обсуждает разбор. Вход по QR-коду, регистрация и сбор данных не нужны.</p><ul class="clean"><li>Материалы для учителя: план урока и вопросы для обсуждения (скоро).</li><li>Подходит для 8–11 классов и студентов колледжей.</li><li>Хотите пилот в вашей школе? Свяжитесь с командой проекта.</li></ul><p><a href="#/pilot" data-act="close">Пробное занятие с заданиями до и после</a></p>'],
@@ -576,7 +587,8 @@
   };
   function openInfo(k) {
     if (k === 'menu') {
-      $('#modal-body').innerHTML = `<h2>Меню</h2><div class="modal-links">${['about', 'rules', 'partners', 'help'].map(x => `<button data-act="info" data-k="${x}">${t(x)}</button>`).join('')}</div>`;
+      const sec = [['#/news', 'Новости'], ['#/quest', 'Квесты и игры'], ['#/antifraud', 'Проверка мошенников'], ['#/events', 'Афиша'], ['#/check', 'Проверка'], ['#/psychologists', 'Психологи'], ['#/facts', 'Цифры и замеры'], ['#/trainer', 'Тренажёр']];
+      $('#modal-body').innerHTML = `<h2>Меню</h2><div class="modal-links">${sec.map(([h, n]) => `<a class="mlink" href="${h}" data-act="close">${n}</a>`).join('')}</div><div class="modal-links" style="margin-top:6px">${['about', 'rules', 'partners', 'help'].map(x => `<button data-act="info" data-k="${x}">${t(x)}</button>`).join('')}</div>`;
     } else {
       $('#modal-body').innerHTML = `<h2>${INFO[k][0]}</h2>${INFO[k][1]}`;
     }
@@ -590,7 +602,7 @@
     let r = route(); if (!V[r]) r = 'home';
     $('#view').innerHTML = V[r]();
     document.body.classList.toggle('no-bot', r === 'dozor' || r === 'psychologists' || r === 'antifraud');
-    const tab = ({ dozor: 'quest', pilot: 'quest', psychologists: 'support', antifraud: 'support', facts: 'home', news: 'home', search: '' })[r] ?? r;
+    const tab = ({ dozor: 'quest', pilot: 'quest', trainer: 'quest', psychologists: 'support', antifraud: 'support', facts: 'home', search: '' })[r] ?? r;
     $$('#dock a, #mainnav a').forEach(x => { if (x.dataset.tab === tab) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current'); });
     if (V[r].mount) V[r].mount();
     if (!keepScroll) window.scrollTo({ top: 0 });
