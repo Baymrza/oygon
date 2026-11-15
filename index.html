@@ -8,9 +8,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
+<div class="banner" id="banner" role="region" aria-label="Объявление" hidden>
+  <svg class="bn-ic" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h16v4H4zM12 9v12M4 13v7h16v-7M12 9c-2.5 0-4-1-4-2.5S9.2 4 12 6c2.8-2 4-.5 4 .5S14.500 9 12 9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="bn-text"><b>Классный час для школ</b> <span class="bn-date">Пилот · 30–40 минут</span>
+    <strong>УВАЖАЕМЫЕ УЧИТЕЛЯ!</strong>
+    <span>Приглашаем вас провести урок «Цифровой иммунитет»: игра, тренажёр и разбор без регистрации и сбора данных.</span></div>
+  <button class="bn-btn" data-act="info" data-k="teachers">Подробнее <span aria-hidden="true">→</span></button>
+  <button class="bn-x" id="bn-x" aria-label="Закрыть объявление">×</button>
+</div>
 <header class="top">
   <a class="logo" href="#/home" aria-label="Ойгон — на главную">
     <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
@@ -41,8 +49,9 @@
 
 <dialog id="modal"><div class="modal-in"><button class="x" data-act="close" aria-label="Закрыть">×</button><div id="modal-body"></div></div></dialog>
 
-<script src="data.js?v=8"></script>
-<script src="game.js?v=8"></script>
-<script src="app.js?v=8"></script>
+<script src="data.js?v=10"></script>
+<script src="banner.js?v=10"></script>
+<script src="game.js?v=10"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>
