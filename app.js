@@ -191,6 +191,8 @@
   // Квест
   V.quest = () => {
     if (window.GAME && GAME.active()) return GAME.view();
+    // ссылка для презентации: #/quest?start=chat сразу запускает «Закрытый чат»
+    if (!Q && new URLSearchParams(location.hash.split('?')[1] || '').get('start') === 'chat') Q = { i: 0, good: 0, picked: null, picks: [], lead: '', done: false };
     if (!Q) {
       const g = LS.get('ob_game', null);
       return `<div class="page">
@@ -401,6 +403,9 @@
   };
   V.antifraud = () => {
     const lg = lang === 'ky' ? 'ky' : 'ru', ex = window.ANTIFRAUD ? ANTIFRAUD.examples(lg) : [];
+    // ссылка для презентации: #/antifraud?ex=card|prize|relative|fake|real запускает пример
+    const exId = new URLSearchParams(location.hash.split('?')[1] || '').get('ex');
+    if (exId && !AF.done) { const e = ex.find(x => x.id === exId); if (e) AF = { input: e.text, done: true }; }
     return `<div class="page wide af">
       <section class="af-hero"><div class="af-shield" aria-hidden="true"><svg viewBox="0 0 24 24" width="44" height="44"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.6 12.2l2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div><span class="eyebrow">Проверка мошенников</span><h1>Борьба с мошенниками, которые спонсируют экстремизм</h1>
@@ -421,7 +426,7 @@
         <p class="f-src">Основано на открытом проекте ANTI-FRAUD KG: те же правила и веса, работают без сервера.</p></section>
     </div>`;
   };
-  V.antifraud.mount = () => { if (AF.done) { const r = $('#af-res'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+  V.antifraud.mount = () => { if (AF.done) setTimeout(() => { const r = $('#af-res'); if (r) { const y = r.getBoundingClientRect().top + scrollY - 70; scrollTo({ top: y, behavior: 'auto' }); } }, 250); };
 
   /* ---------- Цифры и замеры ---------- */
   const fmt = n => Number(n).toLocaleString('ru-RU');
