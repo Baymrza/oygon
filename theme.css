@@ -87,7 +87,6 @@ main{min-height:60vh}
 .dock{border-radius:20px;background:var(--glass);box-shadow:0 14px 34px -12px rgba(40,25,5,.35)}
 .dock a{border-radius:14px}
 .dock a[aria-current="page"]{background:var(--red);color:#fff}
-@media (min-width:900px){.dock{display:none}}
 @media (max-width:899px){
   .mainnav{display:none}
   .tagline,.search{display:none}
@@ -211,3 +210,8 @@ dialog{border-radius:20px}
   .home-wrap{gap:30px}
   .util-in .today{font-size:12px}
 }
+
+/* навигация как в первой версии: плавающая нижняя панель с иконками на всех экранах */
+.mainnav{display:none}
+main{padding-bottom:110px}
+.foot{padding-bottom:110px}
