@@ -101,6 +101,9 @@
         </div>
         <div class="hero2-img" style="background-image:url(assets/t-akbuura.jpg)" role="img" aria-label=""></div>
       </section>
+      <section class="af-promo"><div class="af-shield" aria-hidden="true"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.6 12.2l2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="af-promo-t"><h2>Борьба с мошенниками, которые спонсируют экстремизм</h2><p>Проверь подозрительное сообщение или ссылку за 10 секунд.</p></div>
+        <a class="btn xl" href="#/antifraud">Проверить сообщение <span aria-hidden="true">→</span></a></section>
       <div class="orn-divider" aria-hidden="true"><svg viewBox="0 0 64 32"><use href="#horn"/></svg></div>
       <section class="trio" aria-label="Игры и истории">${tiles}</section>
       ${factsStrip()}
@@ -366,6 +369,49 @@
       <div class="row"><button class="btn" type="submit">Сохранить в демо</button></div>
     </form></div>`;
 
+  /* ---------- Проверка мошенников (порт ANTI-FRAUD KG, работает в браузере) ---------- */
+  let AF = { input: '' , done: false };
+  const AF_SEV = { ru: { high: 'сильный сигнал', medium: 'средний', low: 'слабый', info: 'справка', good: 'хорошо' }, ky: { high: 'күчтүү белги', medium: 'орто', low: 'начар', info: 'маалымат', good: 'жакшы' } };
+  const AF_EX = { card: 'Карта заблокирована', prize: 'Вы выиграли', relative: 'Родственник в беде', fake: 'Фальшивая ссылка банка', real: 'Настоящий сайт банка' };
+  const afResult = () => {
+    if (!AF.done || !window.ANTIFRAUD) return '';
+    const lg = lang === 'ky' ? 'ky' : 'ru', r = ANTIFRAUD.analyze(AF.input, lg);
+    if (r.error === 'empty') return '<div class="alert">Введи текст или ссылку.</div>';
+    if (r.error) return '<div class="alert">Не удалось разобрать ссылку. Проверь адрес.</div>';
+    const sc = r.scheme && r.scheme.description[lg];
+    return `<div class="card af-res st-${r.status}" id="af-res">
+      <div class="af-top"><div class="af-score"><b>${r.score}</b><span>из 100</span></div>
+        <div><span class="eyebrow">Оценка риска</span><h2>${esc(r.label)}</h2><div class="meter af-meter"><i style="width:${Math.max(4, r.score)}%"></i></div></div></div>
+      <p class="af-adv">${esc(r.advice)}</p>
+      ${r.signals.length ? `<h3>Почему так</h3><ul class="af-sig">${r.signals.map(s => `<li class="sv-${s.severity}"><span class="af-chip">${AF_SEV[lg][s.severity] || ''}</span><span>${esc(s.title)}${s.evidence ? ` <code>${esc(s.evidence)}</code>` : ''}</span></li>`).join('')}</ul>` : ''}
+      ${r.tips.length ? `<h3>Что делать</h3><ul class="clean">${r.tips.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+      ${sc ? `<div class="af-scheme"><span class="eyebrow">Похоже на схему</span><h3>${esc(lg === 'ky' ? r.scheme.title_ky : r.scheme.title_ru)}</h3><p>${esc(sc.looks_like)}</p><b>На что смотреть</b><ul class="clean">${sc.watch.map(x => `<li>${esc(x)}</li>`).join('')}</ul><b>Что делать</b><ul class="clean">${sc.do.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
+      <div class="row"><button class="btn ghost" data-act="af-clear">Проверить другое</button><a class="btn" href="#/report">Сообщить о случае (демо)</a></div></div>`;
+  };
+  V.antifraud = () => {
+    const lg = lang === 'ky' ? 'ky' : 'ru', ex = window.ANTIFRAUD ? ANTIFRAUD.examples(lg) : [];
+    return `<div class="page wide af">
+      <section class="af-hero"><div class="af-shield" aria-hidden="true"><svg viewBox="0 0 24 24" width="44" height="44"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.6 12.2l2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><span class="eyebrow">Проверка мошенников</span><h1>Борьба с мошенниками, которые спонсируют экстремизм</h1>
+        <p>Деньги, коды и данные, которые мошенники выманивают у людей, могут идти на другие преступления, в том числе на вербовку и финансирование экстремизма. Не отдавай их: проверь сообщение или ссылку здесь.</p></div></section>
+      <div class="af-steps">
+        <article class="card"><span class="af-n">1</span><h3>Мошенники давят и торопят</h3><p>Срочность, угрозы, «выигрыш», просьба кода из СМС или перевода денег.</p></article>
+        <article class="card"><span class="af-n">2</span><h3>Деньги и данные уходят дальше</h3><p>Выманенные суммы и документы могут использоваться для других преступлений, в том числе для вербовки и финансирования экстремистов.</p></article>
+        <article class="card"><span class="af-n">3</span><h3>Ты можешь остановить цепочку</h3><p>Не переводи деньги и не сообщай коды, проверь сообщение, расскажи взрослому и сообщи о случае.</p></article>
+      </div>
+      <section class="card rim af-box"><h2>Проверь сообщение или ссылку</h2>
+        <form data-form="af"><div class="field"><label for="af-input">Вставь подозрительное сообщение или ссылку</label>
+          <textarea id="af-input" maxlength="2000" placeholder="Например: Ваша карта заблокирована, перейдите по ссылке…">${esc(AF.input)}</textarea></div>
+          <div class="row"><button class="btn xl" type="submit">Проверить</button><button class="btn ghost" type="button" data-act="af-clear">Очистить</button></div></form>
+        <div class="af-ex"><span class="eyebrow">Примеры (вымышленные):</span><div class="chips">${ex.map(e => `<button class="chip" type="button" data-act="af-ex" data-t="${esc(e.text)}">${AF_EX[e.id]}</button>`).join('')}</div></div>
+        <p class="notice" style="text-align:left;padding:0">Проверка идёт в твоём браузере: текст никуда не отправляется. Это помощник, а не вердикт: он не открывает сайт и не знает базу жалоб.</p></section>
+      ${afResult()}
+      <section class="card af-facts"><h3>Мошенничество в Кыргызстане в цифрах</h3><p>В 2025 году у граждан интернет-мошенники украли 826 млн сомов.</p><div class="row"><a class="btn ghost sm" href="#/facts">Открыть цифры и замеры</a></div>
+        <p class="f-src">Основано на открытом проекте ANTI-FRAUD KG: те же правила и веса, работают без сервера.</p></section>
+    </div>`;
+  };
+  V.antifraud.mount = () => { if (AF.done) { const r = $('#af-res'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
+
   /* ---------- Цифры и замеры ---------- */
   const fmt = n => Number(n).toLocaleString('ru-RU');
   const srcLine = (s, d) => `<span class="f-src">${esc(s)} · ${esc(d)}</span>`;
@@ -543,8 +589,8 @@
     clearInterval(timerId);
     let r = route(); if (!V[r]) r = 'home';
     $('#view').innerHTML = V[r]();
-    document.body.classList.toggle('no-bot', r === 'dozor' || r === 'psychologists');
-    const tab = ({ dozor: 'quest', pilot: 'quest', psychologists: 'support', facts: 'home', news: 'home', search: '' })[r] ?? r;
+    document.body.classList.toggle('no-bot', r === 'dozor' || r === 'psychologists' || r === 'antifraud');
+    const tab = ({ dozor: 'quest', pilot: 'quest', psychologists: 'support', antifraud: 'support', facts: 'home', news: 'home', search: '' })[r] ?? r;
     $$('#dock a, #mainnav a').forEach(x => { if (x.dataset.tab === tab) x.setAttribute('aria-current', 'page'); else x.removeAttribute('aria-current'); });
     if (V[r].mount) V[r].mount();
     if (!keepScroll) window.scrollTo({ top: 0 });
@@ -565,6 +611,8 @@
       case 'share': { const u = location.href.split('#')[0]; if (navigator.share) navigator.share({ title: 'Ойгон', url: u }).catch(() => {}); else navigator.clipboard && navigator.clipboard.writeText(u).then(() => { el.textContent = 'Ссылка скопирована'; }); break; }
       case 'evcat': evCat = el.dataset.c; render(true); break;
       case 'post': openPost(el.dataset.id); break;
+      case 'af-ex': AF = { input: el.dataset.t, done: true }; render(true); break;
+      case 'af-clear': AF = { input: '', done: false }; render(true); break;
       case 'psy': openPsy(el.dataset.id); break;
       case 'scrollto': { const t = document.getElementById(el.dataset.t); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
       case 'psyjoin': openPsyJoin(); break;
@@ -615,6 +663,7 @@
       r.push({ id, cat: $('#rc').value, text: $('#rt').value.trim(), link: $('#rl').value.trim(), status: 'Новое', at: Date.now() });
       LS.set('ob_reports', r); reportSent = id; render();
     }
+    if (kind === 'af') { AF = { input: $('#af-input').value, done: true }; render(true); return; }
     if (kind === 'login') { if ($('#ac').value === '1234') { adminOK = true; render(); } else $('#aerr').textContent = 'Неверный код.'; }
     if (kind === 'publish') {
       const type = $('#pk').value, title = $('#pt').value.trim(), text = $('#px').value.trim(), tag = $('#pm').value.trim(), extra = $('#pd').value.trim();
@@ -649,14 +698,15 @@
     } catch { }
   }
 
-  /* плавающая кнопка «Психологи»: пузырь выезжает через пару секунд, его можно закрыть */
+  /* два плавающих помощника («Проверка мошенников» и «Психологи») падают сверху; пузырь выезжает позже */
   (function initBot() {
     const box = $('#bot'), bubble = $('#bot-bubble'); if (!box || !bubble) return;
     let closed = false; try { closed = sessionStorage.getItem('ob_bot') === '1'; } catch { }
-    setTimeout(() => { if (!closed) bubble.classList.add('show'); }, 3000);
-    $('#bot-x').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); bubble.classList.remove('show'); try { sessionStorage.setItem('ob_bot', '1'); } catch { } });
-    bubble.addEventListener('click', e => { if (e.target.closest('.bot-cta')) { bubble.classList.remove('show'); try { sessionStorage.setItem('ob_bot', '1'); } catch { } } });
-    $('#bot-btn').addEventListener('click', () => bubble.classList.remove('show'));
+    const hide = () => { bubble.classList.remove('show'); try { sessionStorage.setItem('ob_bot', '1'); } catch { } };
+    setTimeout(() => { if (!closed) bubble.classList.add('show'); }, 3600);
+    $('#bot-x').addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); hide(); });
+    bubble.addEventListener('click', e => { if (e.target.closest('.bot-cta')) hide(); });
+    $('#bot-btn').addEventListener('click', hide); $('#af-btn').addEventListener('click', hide);
   })();
 
   applyLang(); buildDock(); setToday(); render();
