@@ -281,6 +281,7 @@
       <div class="card rim hero"><span class="eyebrow">Путь пройден · ${total()} городов</span><div class="big-score">${pct}%</div><h2>${tier[0]}</h2><p>${tier[1]}</p><div class="meter"><i style="width:${pct}%"></i></div>
         <div class="stats"><div class="stat"><b>${G.flagsFound}/${G.flagsTotal}</b><span>красных флагов найдено</span></div><div class="stat"><b>${G.log.filter(x => x.good).length}/${total()}</b><span>верных решений</span></div></div></div>
       <div class="card post"><h3>Приёмы, которые ты встретил</h3><ul class="clean">${techs.map(k => `<li><b>${esc(D.tech[k].n)}.</b> ${esc(D.tech[k].d)}</li>`).join('')}</ul></div>
+      ${window.OB_HELP ? OB_HELP() : ''}
       <div class="row"><button class="btn" data-act="g-start">Пройти заново</button><button class="btn ghost" data-act="g-share">Поделиться</button><a class="btn ghost" href="#/report">Сообщить о случае</a><button class="btn ghost" data-act="g-quit">В меню квестов</button></div></div>`;
   }
 

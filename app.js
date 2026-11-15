@@ -259,12 +259,20 @@
       <img src="assets/phone.jpg" alt="" aria-hidden="true">
     </div>`;
   }
+  // Куда обратиться за помощью (111 и 112 проверены по открытым источникам, см. «Поддержка»)
+  const helpCard = () => `<div class="card rim post"><h3>Куда обратиться за помощью</h3>
+      <div class="hot"><b>111</b><span>Телефон доверия для детей и подростков · круглосуточно, бесплатно</span></div>
+      <div class="hot"><b>112</b><span>Единый номер экстренных служб</span></div>
+      <p>Если тебе пишут так же: поговори со взрослым, которому доверяешь.</p><div class="row"><a class="btn ghost sm" href="#/support">Открыть «Поддержку»</a></div></div>`;
+  window.OB_HELP = helpCard;
+
   function questEnd() {
     const e = D.quest.endings.find(x => Q.good >= x.min);
     const used = [...new Set(D.quest.scenes.flatMap(s => s.tricks))];
     return `<div class="page">
       <div class="card rim hero"><span class="eyebrow">Итог квеста</span><div class="big-score">${Q.good}/${QUEST_MAX}</div><h2>${esc(e.title)}</h2><p>${esc(e.text)}</p></div>
       <div class="card post"><h3>Красные флаги из этой истории</h3><ul class="clean">${used.map(k => `<li><b>${esc(D.tech[k].n)}.</b> ${esc(D.tech[k].d)}</li>`).join('')}</ul></div>
+      ${helpCard()}
       <div class="row"><button class="btn" data-act="q-start">Пройти ещё раз</button><a class="btn ghost" href="#/trainer">В тренажёр</a><a class="btn ghost" href="#/report">Сообщить о случае</a></div>
     </div>`;
   }
@@ -436,13 +444,18 @@
   V.facts = () => {
     const F = D.facts, best = LS.get('ob_best', null), game = LS.get('ob_game', null), P = LS.get('ob_pilot', {});
     const pv = r => r ? `<span>Признаков найдено: ${r.hits} из 4</span> · <span>${r.safe ? 'Безопасный ответ: да' : 'Безопасный ответ: нет'}</span>` : '—';
-    const nav = [['f-scale', 'Масштаб проблемы'], ['f-years', 'Шкала по годам'], ['f-help', 'Помощь и обращения'], ['f-result', 'Результаты проекта']];
+    const nav = [['f-scale', 'Масштаб проблемы'], ['f-osh', 'Почему в Оше'], ['f-years', 'Шкала по годам'], ['f-help', 'Помощь и обращения'], ['f-result', 'Результаты проекта']];
     return `<div class="page wide facts">
       <div class="page-head"><span class="eyebrow">Цифры и замеры</span><h1>Масштаб проблемы и результаты проекта</h1><p>Что известно о мошенничестве и обращениях за помощью в Кыргызстане и как мы будем измерять результат. У каждой цифры есть период, источник и дата.</p></div>
       <div class="chips f-nav">${nav.map(([id, n]) => `<button class="chip" data-act="scrollto" data-t="${id}">${n}</button>`).join('')}</div>
 
       <section id="f-scale"><h2 class="sec hd">Масштаб проблемы</h2>
         <div class="fgrid">${F.key.map(f => `<article class="card fcard">${statTile(f, false)}<p class="fnote">${esc(f.note)}</p>${srcLine(f.src, f.date)}<a class="flink" target="_blank" rel="noopener" href="${esc(f.url)}">Открыть источник <span aria-hidden="true">↗</span></a></article>`).join('')}</div>
+      </section>
+
+      <section id="f-osh"><h2 class="sec hd">Почему в Оше</h2>
+        <div class="fgrid2"><article class="card fcard">${statTile(F.osh, false)}<p class="fnote">${esc(F.osh.note)}</p>${srcLine(F.osh.src, F.osh.date)}<a class="flink" target="_blank" rel="noopener" href="${esc(F.osh.url)}">Открыть источник <span aria-hidden="true">↗</span></a></article>
+          <div class="card"><ul class="clean">${F.oshPoints.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></div>
       </section>
 
       <section id="f-years"><h2 class="sec hd">Шкала по годам</h2>
@@ -525,7 +538,8 @@
     post: { msg: 'Ты один из немногих, кто всё понимает, не то что остальные. Группа открыта только до вечера. Родители тебя не поймут, им лучше не показывать.', right: ['flattery', 'us_them', 'urgency', 'isolation'],
       replies: [['Ладно, зайду, пока не закрыли', false], ['Не буду. Покажу сообщение маме или учителю и заблокирую контакт', true], ['Скажу, что подумаю до вечера, и зайду посмотреть', false]] }
   };
-  let PL = { sel: new Set(), reply: null, after: false };
+  const PILOT_HELP = { q: 'Куда обратиться, если тебе пишут с давлением или угрозами?', opts: [['Отвечать и оправдываться, чтобы отстали', false], ['Поговорить со взрослым, которому доверяю, или позвонить на 111', true], ['Ничего не делать и ждать, что само пройдёт', false]] };
+  let PL = { sel: new Set(), reply: null, help: null, after: false };
   const pScore = r => Math.max(0, r.hits - r.extra);
   const pTask = key => {
     const t = PILOT[key];
@@ -535,7 +549,9 @@
       <div class="chips">${PILOT.techs.map(k => `<button class="chip" data-act="p-tech" data-k="${k}" aria-pressed="${PL.sel.has(k)}">${esc(D.tech[k].n)}</button>`).join('')}</div>
       <h3>2. Как ответишь?</h3>
       <div class="choices">${t.replies.map((r, i) => `<button class="choice ${PL.reply === i ? 'ok' : ''}" data-act="p-reply" data-k="${i}" aria-pressed="${PL.reply === i}">${esc(r[0])}</button>`).join('')}</div>
-      <div class="row"><button class="btn" data-act="p-submit" ${PL.reply == null ? 'disabled' : ''}>Сохранить ответ</button></div></div>`;
+      <h3>3. ${PILOT_HELP.q}</h3>
+      <div class="choices">${PILOT_HELP.opts.map((r, i) => `<button class="choice ${PL.help === i ? 'ok' : ''}" data-act="p-help" data-k="${i}" aria-pressed="${PL.help === i}">${esc(r[0])}</button>`).join('')}</div>
+      <div class="row"><button class="btn" data-act="p-submit" ${PL.reply == null || PL.help == null ? 'disabled' : ''}>Сохранить ответ</button></div></div>`;
   };
   V.pilot = () => {
     const P = LS.get('ob_pilot', {});
@@ -544,8 +560,8 @@
     else if (!P.post && !PL.after) body = `<div class="card rim post"><h2>Задание до квеста сохранено</h2><p>Теперь пройди «Закрытый чат», а потом вернись за вторым заданием.</p><div class="row"><button class="btn" data-act="home-chat">Начать «Закрытый чат»</button><button class="btn ghost" data-act="p-after">Перейти к заданию после квеста</button></div></div>`;
     else if (!P.post) body = pTask('post');
     else {
-      const col = (title, r) => `<div class="card post"><h3>${title}</h3><div class="stat"><b>${r.hits}/4</b><span>Признаков найдено: ${r.hits} из 4</span></div><p>Лишних отметок: ${r.extra}</p><p>${r.safe ? 'Безопасный ответ: да' : 'Безопасный ответ: нет'}</p></div>`;
-      const d = (pScore(P.post) + (P.post.safe ? 1 : 0)) - (pScore(P.pre) + (P.pre.safe ? 1 : 0));
+      const col = (title, r) => `<div class="card post"><h3>${title}</h3><div class="stat"><b>${r.hits}/4</b><span>Признаков найдено: ${r.hits} из 4</span></div><p>Лишних отметок: ${r.extra}</p><p>${r.safe ? 'Безопасный ответ: да' : 'Безопасный ответ: нет'}</p>${r.help === undefined ? '' : `<p>${r.help ? 'Знает, где искать помощь: да' : 'Знает, где искать помощь: нет'}</p>`}</div>`;
+      const d = (pScore(P.post) + (P.post.safe ? 1 : 0) + (P.post.help ? 1 : 0)) - (pScore(P.pre) + (P.pre.safe ? 1 : 0) + (P.pre.help ? 1 : 0));
       body = `<h2>Сравнение до и после</h2><div class="trio2">${col('До квеста', P.pre)}${col('После квеста', P.post)}</div>
         <div class="card rim post"><p style="color:var(--ink)"><b>${d > 0 ? 'Ты стал лучше замечать признаки давления.' : d === 0 ? 'Результат не изменился. Пройди «Закрытый чат» ещё раз и сравни.' : 'Результат стал ниже. Перечитай разбор в квесте и попробуй снова.'}</b></p>
         <div class="row"><button class="btn" data-act="home-chat">Начать «Закрытый чат»</button><button class="btn ghost" data-act="p-reset">Пройти заново</button></div></div>`;
@@ -584,8 +600,8 @@
 
   /* ---------- инфо-окна ---------- */
   const INFO = {
-    about: ['О проекте', '<p>«Ойгон» помогает школьникам и студентам распознавать манипуляцию и вербовку в сети. Мы не блокируем и не запрещаем, а вырабатываем иммунитет: учим узнавать приёмы давления на историях, в квесте и тренажёре.</p><p>Платформа объединяет новости, квесты и игры, проверку мошенников и афишу. Главные идеи: защищать молодёжь от плохого, давать путь к хорошему и бороться с мошенниками, которые спонсируют экстремизм.</p><p>Проект создан на хакатоне Digital Hackathon Osh. Название «Ойгон» — «пробудись, будь внимателен».</p>'],
-    rules: ['Правила платформы', '<ul class="clean"><li>Нейтральность: оцениваем приёмы манипуляции, а не убеждения и группы людей.</li><li>Приватность: без регистрации, без баз персональных данных.</li><li>Без комментариев и открытых дискуссий: только реакции.</li><li>В рабочей версии обращение уходит оператору только если пользователь сам нажал «Отправить». Сейчас форма работает в демо-режиме.</li><li>Публикуют только уполномоченные операторы, с модерацией.</li></ul>'],
+    about: ['О проекте', '<p>«Ойгон» помогает школьникам и студентам распознавать манипуляцию и вербовку в сети. Мы не блокируем и не запрещаем, а вырабатываем иммунитет: учим узнавать приёмы давления на историях, в квесте и тренажёре.</p><p>Платформа объединяет новости, квесты и игры, проверку мошенников и афишу. Главные идеи: защищать молодёжь от плохого, давать путь к хорошему и бороться с мошенниками, которые спонсируют экстремизм.</p><p>Проект создан на хакатоне Digital Hackathon Osh. Название «Ойгон» — «пробудись, будь внимателен».</p><p>Что работает сейчас: игры и квесты, тренажёр, проверка мошенников, цифры и замеры. Что пока макет: форма «Сообщить», профили психологов и админ-панель.</p>'],
+    rules: ['Правила платформы', '<ul class="clean"><li>Нейтральность: оцениваем приёмы манипуляции, а не убеждения и группы людей.</li><li>Приватность: без регистрации, без баз персональных данных.</li><li>Без комментариев и открытых дискуссий: только реакции.</li><li>В рабочей версии обращение уходит оператору только если пользователь сам нажал «Отправить». Сейчас форма работает в демо-режиме.</li><li>Публикуют только уполномоченные операторы, с модерацией.</li><li>Срок хранения: данные остаются в браузере пользователя, пока он сам их не удалит. На нашем сервере данные не хранятся.</li></ul>'],
     partners: ['Партнёры', '<p>Школы и вузы региона, правоохранительные органы, психологи и факультеты психологии. Здесь появятся логотипы партнёров пилота.</p>'],
     teachers: ['Классный час «Цифровой иммунитет»', '<p>Приглашаем учителей и кураторов провести урок на 30–40 минут: класс проходит игру «Путь пяти городов», тренажёр и обсуждает разбор. Вход по QR-коду, регистрация и сбор данных не нужны.</p><ul class="clean"><li>Материалы для учителя: план урока и вопросы для обсуждения (скоро).</li><li>Подходит для 8–11 классов и студентов колледжей.</li><li>Хотите пилот в вашей школе? Свяжитесь с командой проекта.</li></ul><p><a href="#/pilot" data-act="close">Пробное занятие с заданиями до и после</a></p>'],
     help: ['Помощь и контакты', '<p>Нужна поддержка — загляни во вкладку «Поддержка». Хочешь попробовать форму обращения — вкладка «Сообщить» (демо). Для школ и учителей: материалы для классного часа будут на сайте.</p><p><a href="#/admin" data-act="close">Вход для операторов</a></p>']
@@ -654,13 +670,14 @@
       case 'home-chat': { if (window.GAME && GAME.active()) GAME.handle('g-quit', null, () => {}); Q = { i: 0, good: 0, picked: null, picks: [], lead: '', done: false }; if (route() === 'quest') render(); else location.hash = '#/quest'; break; }
       case 'p-tech': if (PL.sel.has(k)) PL.sel.delete(k); else PL.sel.add(k); render(true); break;
       case 'p-reply': PL.reply = +k; render(true); break;
-      case 'p-after': PL = { sel: new Set(), reply: null, after: true }; render(); break;
-      case 'p-reset': try { localStorage.removeItem('ob_pilot'); } catch { } PL = { sel: new Set(), reply: null, after: false }; render(); break;
+      case 'p-help': PL.help = +k; render(true); break;
+      case 'p-after': PL = { sel: new Set(), reply: null, help: null, after: true }; render(); break;
+      case 'p-reset': try { localStorage.removeItem('ob_pilot'); } catch { } PL = { sel: new Set(), reply: null, help: null, after: false }; render(); break;
       case 'p-submit': {
         const P = LS.get('ob_pilot', {}), key = P.pre ? 'post' : 'pre', t = PILOT[key];
         const hits = [...PL.sel].filter(x => t.right.includes(x)).length, extra = PL.sel.size - hits;
-        P[key] = { hits, extra, safe: !!t.replies[PL.reply][1] }; LS.set('ob_pilot', P);
-        PL = { sel: new Set(), reply: null, after: false }; render(); break; }
+        P[key] = { hits, extra, safe: !!t.replies[PL.reply][1], help: !!PILOT_HELP.opts[PL.help][1] }; LS.set('ob_pilot', P);
+        PL = { sel: new Set(), reply: null, help: null, after: false }; render(); break; }
       // админка
       case 'atab': adminTab = k; render(true); break;
       case 'a-out': adminOK = false; render(); break;
